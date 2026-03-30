@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 정보</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page">
+    <div class="card profile-card">
+        <h1>내 정보</h1>
+        <div class="alert success" th:if="${message}" th:text="${message}"></div>
+
+        <div class="info-row">
+            <span class="label">로그인 아이디</span>
+            <strong th:text="${member.loginId}"></strong>
+        </div>
+        <div class="info-row">
+            <span class="label">이름</span>
+            <strong th:text="${member.name}"></strong>
+        </div>
+
+        <div class="actions">
+            <a class="button primary" th:href="@{/me/name}">이름 변경</a>
+            <a class="button secondary" th:href="@{/me/password}">암호 변경</a>
+        </div>
+
+        <div class="actions">
+            <a class="button ghost" th:href="@{/}">홈으로 이동</a>
+            <form th:action="@{/logout}" method="post">
+                <button class="button danger" type="submit">로그아웃</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

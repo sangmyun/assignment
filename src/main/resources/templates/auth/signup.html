@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page">
+    <div class="card form-card">
+        <p class="eyebrow">Create account</p>
+        <h1>회원가입</h1>
+        <p class="lead">새 계정을 만들기 위해 정보를 입력하세요.</p>
+
+        <form th:action="@{/signup}" th:object="${signupForm}" method="post">
+            <label for="loginId">아이디</label>
+            <input id="loginId" th:field="*{loginId}" type="text" placeholder="4~20자">
+            <p class="field-error" th:if="${#fields.hasErrors('loginId')}" th:errors="*{loginId}"></p>
+
+            <label for="password">비밀번호</label>
+            <input id="password" th:field="*{password}" type="password" placeholder="비밀번호 입력">
+            <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+
+            <label for="passwordConfirm">비밀번호 확인</label>
+            <input id="passwordConfirm" th:field="*{passwordConfirm}" type="password" placeholder="비밀번호 다시 입력">
+            <p class="field-error" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></p>
+
+            <label for="name">이름</label>
+            <input id="name" th:field="*{name}" type="text" placeholder="이름 입력">
+            <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+
+            <button class="button primary full" type="submit">계정 만들기</button>
+        </form>
+
+        <p class="sub-link">이미 계정이 있으면 <a th:href="@{/login}">로그인</a></p>
+    </div>
+</div>
+</body>
+</html>

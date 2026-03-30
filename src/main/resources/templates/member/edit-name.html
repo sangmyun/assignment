@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이름 변경</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page">
+    <div class="card form-card">
+        <h1>이름 변경</h1>
+
+        <form th:action="@{/me/name}" th:object="${updateNameForm}" method="post">
+            <label for="name">새 이름</label>
+            <input id="name" th:field="*{name}" type="text" placeholder="이름 입력">
+            <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+
+            <button class="button primary full" type="submit">이름 저장</button>
+        </form>
+
+        <p class="sub-link"><a th:href="@{/me}">내 정보로 돌아가기</a></p>
+    </div>
+</div>
+</body>
+</html>

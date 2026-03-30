@@ -3,36 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 정보</title>
+    <title>사다리 게임</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="page">
-    <div class="card profile-card">
-        <h1>내 정보</h1>
-        <div class="alert success" th:if="${message}" th:text="${message}"></div>
+<div class="page page-wide">
+    <div class="game-shell">
+        <main class="game-main">
+            <section class="card game-hero">
+                <p class="eyebrow">Ladder Game</p>
+                <h1>간단한 사다리 게임</h1>
+                <p class="lead">참가자와 결과를 입력한 뒤 사다리를 생성해서 바로 결과를 확인할 수 있습니다.</p>
+                <div class="alert success" th:if="${message}" th:text="${message}"></div>
+            </section>
 
-        <div class="info-row">
-            <span class="label">로그인 아이디</span>
-            <strong th:text="${member.loginId}"></strong>
-        </div>
-        <div class="info-row">
-            <span class="label">이름</span>
-            <strong th:text="${member.name}"></strong>
-        </div>
+            <section class="card game-controls">
+                <div class="panel-head">
+                    <h2>게임 설정</h2>
+                    <p>참가자 수와 결과 수는 같아야 하며, 2명에서 6명까지 입력할 수 있습니다.</p>
+                </div>
 
-        <div class="actions">
-            <a class="button primary" th:href="@{/me/name}">이름 변경</a>
-            <a class="button secondary" th:href="@{/me/password}">암호 변경</a>
-        </div>
+                <div class="form-grid">
+                    <div>
+                        <label for="participantsInput">참가자</label>
+                        <textarea id="participantsInput" class="text-area" rows="6" placeholder="예시&#10;민수&#10;지수&#10;현우&#10;서연">민수
+지수
+현우
+서연</textarea>
+                    </div>
+                    <div>
+                        <label for="resultsInput">결과</label>
+                        <textarea id="resultsInput" class="text-area" rows="6" placeholder="예시&#10;커피&#10;치킨&#10;영화&#10;꽝">커피
+치킨
+영화
+꽝</textarea>
+                    </div>
+                </div>
 
-        <div class="actions">
-            <a class="button ghost" th:href="@{/}">홈으로 이동</a>
-            <form th:action="@{/logout}" method="post">
-                <button class="button danger" type="submit">로그아웃</button>
-            </form>
-        </div>
+                <div class="actions">
+                    <button id="generateGameButton" class="button primary" type="button">사다리 생성</button>
+                    <button id="revealAllButton" class="button secondary" type="button">전체 결과 보기</button>
+                </div>
+                <p id="gameStatus" class="hint">기본 예시가 준비되어 있습니다. 바로 생성해볼 수 있습니다.</p>
+            </section>
+
+            <section class="card ladder-card">
+                <div class="panel-head">
+                    <h2>게임 보드</h2>
+                    <p>참가자를 선택하면 연결된 결과를 확인할 수 있습니다.</p>
+                </div>
+
+                <div id="playerTabs" class="player-tabs"></div>
+
+                <div class="ladder-stage">
+                    <canvas id="ladderCanvas" width="720" height="520"></canvas>
+                </div>
+
+                <div id="resultBoard" class="result-board"></div>
+            </section>
+        </main>
+
+        <aside class="game-sidebar">
+            <div class="card sidebar-card">
+                <div class="sidebar-profile">
+                    <div class="avatar" th:text="${#strings.substring(member.name, 0, 1)}">A</div>
+                    <div>
+                        <p class="eyebrow">Account</p>
+                        <h2 th:text="${member.name}">홍길동</h2>
+                        <p class="sidebar-subtitle" th:text="${member.loginId}">hong</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>계정 정보</h3>
+                    <div class="summary-list compact-list">
+                        <div class="summary-item">
+                            <span class="summary-label">아이디</span>
+                            <strong th:text="${member.loginId}"></strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">이름</span>
+                            <strong th:text="${member.name}"></strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">상태</span>
+                            <strong>정상</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>계정 관리</h3>
+                    <div class="quick-actions sidebar-actions">
+                        <a class="button secondary" th:href="@{/me/name}">이름 변경</a>
+                        <a class="button secondary" th:href="@{/me/password}">비밀번호 변경</a>
+                        <a class="button ghost" th:href="@{/}">홈으로 이동</a>
+                        <form th:action="@{/logout}" method="post" class="full-form">
+                            <button class="button ghost full-width" type="submit">로그아웃</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>플레이 팁</h3>
+                    <div class="notice-list sidebar-note-list">
+                        <div class="notice-item">
+                            <strong>참가자 입력</strong>
+                            <p>한 줄에 한 명씩 입력하면 깔끔하게 생성됩니다.</p>
+                        </div>
+                        <div class="notice-item">
+                            <strong>결과 확인</strong>
+                            <p>이름 버튼을 누르면 해당 참가자의 연결 결과가 강조됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
+
+<script th:src="@{/js/ladder-game.js}"></script>
 </body>
 </html>

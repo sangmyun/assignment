@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이름 변경</title>
+    <title>이름 설정</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <div class="page">
     <div class="card form-card">
+        <p class="eyebrow">Profile</p>
         <h1>이름 변경</h1>
+        <p class="lead">계정에 표시되는 이름을 원하는 형태로 수정할 수 있습니다.</p>
 
         <form th:action="@{/me/name}" th:object="${updateNameForm}" method="post">
-            <label for="name">새 이름</label>
+            <label for="name">이름</label>
             <input id="name" th:field="*{name}" type="text" placeholder="이름 입력">
             <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
 
             <button class="button primary full" type="submit">이름 저장</button>
         </form>
 
-        <p class="sub-link"><a th:href="@{/me}">내 정보로 돌아가기</a></p>
+        <p class="sub-link"><a th:href="@{/me}">계정 설정으로 돌아가기</a></p>
     </div>
 </div>
 </body>

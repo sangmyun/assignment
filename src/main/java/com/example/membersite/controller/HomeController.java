@@ -10,6 +10,10 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model, Principal principal) {
+        if (principal != null) {
+            return "redirect:/dashboard";
+        }
+
         model.addAttribute("authenticated", principal != null);
         model.addAttribute("loginId", principal != null ? principal.getName() : null);
         return "home";

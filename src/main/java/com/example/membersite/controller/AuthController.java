@@ -23,7 +23,7 @@ public class AuthController {
     @GetMapping("/signup")
     public String signupForm(Model model, Principal principal) {
         if (principal != null) {
-            return "redirect:/me";
+            return "redirect:/dashboard";
         }
 
         model.addAttribute("signupForm", new SignupForm());
@@ -55,7 +55,7 @@ public class AuthController {
     @GetMapping("/login")
     public String login(Principal principal) {
         if (principal != null) {
-            return "redirect:/me";
+            return "redirect:/dashboard";
         }
         return "auth/login";
     }

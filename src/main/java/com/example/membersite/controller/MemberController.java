@@ -28,7 +28,7 @@ public class MemberController {
     public String profile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Member member = memberService.findByLoginId(userDetails.getUsername());
         model.addAttribute("member", member);
-        return "member/profile";
+        return "member/account";
     }
 
     @GetMapping("/me/name")

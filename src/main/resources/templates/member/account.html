@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정 설정</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page page-wide">
+    <div class="planner-shell">
+        <aside class="planner-sidebar">
+            <div class="card sidebar-card">
+                <div class="sidebar-brand">
+                    <p class="eyebrow">Account</p>
+                    <h2>계정 설정</h2>
+                    <p class="sidebar-subtitle">기본 정보와 보안 설정을 한곳에서 확인하고 관리할 수 있습니다.</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a class="sidebar-link" th:href="@{/dashboard}">일정 홈</a>
+                    <a class="sidebar-link active" th:href="@{/me}">계정 설정</a>
+                </nav>
+
+                <div class="sidebar-section">
+                    <form th:action="@{/logout}" method="post" class="full-form">
+                        <button class="button ghost full-width" type="submit">로그아웃</button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <main class="planner-main">
+            <section class="card account-card">
+                <div class="settings-header">
+                    <div class="avatar" th:text="${#strings.substring(member.name, 0, 1)}">A</div>
+                    <div class="settings-copy">
+                        <p class="eyebrow">Settings</p>
+                        <h1>계정 설정</h1>
+                        <p class="lead">현재 로그인한 계정의 기본 정보와 보안 관련 설정을 확인하고 필요한 항목만 바로 수정할 수 있습니다.</p>
+                    </div>
+                </div>
+
+                <div class="alert success" th:if="${message}" th:text="${message}"></div>
+
+                <div class="account-grid">
+                    <section class="settings-section">
+                        <div class="section-head">
+                            <h2>기본 프로필</h2>
+                            <p>현재 사용 중인 계정의 기본 정보와 로그인에 사용하는 항목입니다.</p>
+                        </div>
+
+                        <div class="summary-list">
+                            <div class="summary-item">
+                                <span class="summary-label">로그인 아이디</span>
+                                <strong th:text="${member.loginId}">hong</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">이름</span>
+                                <strong th:text="${member.name}">홍길동</strong>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="settings-section">
+                        <div class="section-head">
+                            <h2>빠른 설정</h2>
+                            <p>필요한 설정만 바로 수정할 수 있도록 간단하게 정리했습니다.</p>
+                        </div>
+
+                        <div class="quick-actions account-actions">
+                            <a class="button primary" th:href="@{/me/name}">이름 변경</a>
+                            <a class="button secondary" th:href="@{/me/password}">비밀번호 변경</a>
+                            <a class="button ghost" th:href="@{/dashboard}">일정 홈으로 돌아가기</a>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

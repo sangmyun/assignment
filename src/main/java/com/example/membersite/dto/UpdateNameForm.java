@@ -9,6 +9,7 @@ public class UpdateNameForm {
     @Size(max = 30, message = "이름은 30자 이하로 입력하세요.")
     private String name;
 
+    // 반환: 입력된 이름 값
     public String getName() {
         return name;
     }

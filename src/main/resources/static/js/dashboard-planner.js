@@ -16,10 +16,7 @@
         return;
     }
 
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
     const weekdayNames = ["일", "월", "화", "수", "목", "금", "토"];
-
     const today = new Date();
     const todayDate = formatDate(today);
 
@@ -28,6 +25,7 @@
     let selectedDate = todayDate;
     let monthlySchedules = [];
 
+    // Date 객체를 yyyy-MM-dd 문자열로 변환한다.
     function formatDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -35,41 +33,49 @@
         return year + "-" + month + "-" + day;
     }
 
+    // yyyy-MM-dd 문자열을 Date 객체로 변환한다.
     function parseDateString(value) {
         const parts = value.split("-").map(Number);
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
+    // 날짜 문자열을 화면 표시용 형식으로 바꾼다.
     function formatDisplayDate(value) {
         const date = parseDateString(value);
         const month = date.getMonth() + 1;
         const day = date.getDate();
         const weekday = weekdayNames[date.getDay()];
-        return month + "월 " + day + "일 " + weekday + "요일";
+        return month + "월 " + day + "일 (" + weekday + ")";
     }
 
+    // JSON 요청용 공통 헤더를 만든다.
     function createHeaders() {
-        const headers = {
+        return {
             "Content-Type": "application/json"
         };
+    }
 
-        if (csrfToken && csrfHeader) {
-            headers[csrfHeader] = csrfToken;
+    // 인증 만료를 처리하면서 JSON 응답을 가져온다.
+    async function fetchJson(url) {
+        const response = await fetch(url);
+        if (response.status === 401) {
+            window.location.href = "/login";
+            return [];
         }
-
-        return headers;
-    }
-
-    async function fetchMonthlySchedules() {
-        const response = await fetch("/api/schedules?year=" + currentYear + "&month=" + currentMonth);
-        monthlySchedules = await response.json();
-    }
-
-    async function fetchDailySchedules(date) {
-        const response = await fetch("/api/schedules/daily?date=" + date);
         return response.json();
     }
 
+    // 현재 월의 일정 목록을 서버에서 받아온다.
+    async function fetchMonthlySchedules() {
+        monthlySchedules = await fetchJson("/api/schedules?year=" + currentYear + "&month=" + currentMonth);
+    }
+
+    // 선택한 날짜의 일정 목록을 서버에서 받아온다.
+    async function fetchDailySchedules(date) {
+        return fetchJson("/api/schedules/daily?date=" + date);
+    }
+
+    // 상단 요약 카드의 숫자와 날짜를 갱신한다.
     function updateSummary(todaySchedules) {
         if (todayCount) {
             todayCount.textContent = todaySchedules.length + "개";
@@ -84,6 +90,7 @@
         }
     }
 
+    // 월간 일정 데이터를 기준으로 달력 UI를 다시 그린다.
     function renderCalendar() {
         const firstDay = new Date(currentYear, currentMonth - 1, 1);
         const lastDay = new Date(currentYear, currentMonth, 0);
@@ -128,8 +135,9 @@
         }
     }
 
+    // 현재 선택 날짜의 일정 목록을 불러와 화면에 표시한다.
     async function loadDailySchedules() {
-        selectedDateText.textContent = formatDisplayDate(selectedDate) + " 일정";
+        selectedDateText.textContent = formatDisplayDate(selectedDate);
         if (selectedSummaryDate) {
             selectedSummaryDate.textContent = selectedDate === todayDate ? "오늘" : formatDisplayDate(selectedDate);
         }
@@ -137,11 +145,12 @@
         renderDailySchedules(schedules);
     }
 
+    // 하루 일정 목록 영역을 다시 렌더링한다.
     function renderDailySchedules(schedules) {
         dailyScheduleList.innerHTML = "";
 
         if (schedules.length === 0) {
-            dailyScheduleList.innerHTML = "<div class='empty-state'>아직 등록된 계획이 없어요. 날짜를 선택한 뒤 첫 일정을 가볍게 추가해보세요.</div>";
+            dailyScheduleList.innerHTML = "<div class='empty-state'>선택한 날짜에 등록된 일정이 없습니다.</div>";
             return;
         }
 
@@ -163,11 +172,12 @@
         });
     }
 
+    // 입력창의 내용을 현재 선택 날짜 일정으로 저장한다.
     async function saveSchedule() {
         const content = scheduleInput.value.trim();
 
         if (!content) {
-            scheduleStatus.textContent = "계획 내용을 입력해주세요.";
+            scheduleStatus.textContent = "일정 내용을 입력하세요.";
             return;
         }
 
@@ -180,6 +190,11 @@
             })
         });
 
+        if (response.status === 401) {
+            window.location.href = "/login";
+            return;
+        }
+
         if (!response.ok) {
             const message = await response.text();
             scheduleStatus.textContent = message || "일정을 저장하지 못했습니다.";
@@ -191,29 +206,41 @@
         await refreshAll();
     }
 
+    // 선택한 일정 하나를 서버에 삭제 요청한다.
     async function deleteSchedule(scheduleId) {
         const response = await fetch("/api/schedules/" + scheduleId + "/delete", {
             method: "POST",
             headers: createHeaders()
         });
 
+        if (response.status === 401) {
+            window.location.href = "/login";
+            return;
+        }
+
         if (!response.ok) {
             scheduleStatus.textContent = "일정을 삭제하지 못했습니다.";
             return;
         }
 
-        scheduleStatus.textContent = "일정을 삭제했습니다.";
+        scheduleStatus.textContent = "일정이 삭제되었습니다.";
         await refreshAll();
     }
 
+    // 월간 일정, 일간 일정, 요약 정보를 한 번에 새로고침한다.
     async function refreshAll() {
+        // 이번 달 일정 목록 서버에서 가져올때 까지 기다림
         await fetchMonthlySchedules();
+        // 달력을 렌더링
         renderCalendar();
+        // 현재 선태고딘 날짜의 일정 목록 가져옴
         await loadDailySchedules();
+        //
         const todaySchedules = await fetchDailySchedules(todayDate);
         updateSummary(todaySchedules);
     }
 
+    // 일정 내용을 안전하게 출력하기 위해 HTML 특수문자를 이스케이프한다.
     function escapeHtml(value) {
         return value
             .replaceAll("&", "&amp;")

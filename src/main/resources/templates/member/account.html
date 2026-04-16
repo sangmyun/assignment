@@ -14,11 +14,11 @@
                 <div class="sidebar-brand">
                     <p class="eyebrow">Account</p>
                     <h2>계정 설정</h2>
-                    <p class="sidebar-subtitle">기본 정보와 보안 설정을 한곳에서 확인하고 관리할 수 있습니다.</p>
+                    <p class="sidebar-subtitle">기본 정보와 계정 설정을 확인하고 관리할 수 있습니다.</p>
                 </div>
 
                 <nav class="sidebar-nav">
-                    <a class="sidebar-link" th:href="@{/dashboard}">일정 홈</a>
+                    <a class="sidebar-link" th:href="@{/dashboard}">일정표</a>
                     <a class="sidebar-link active" th:href="@{/me}">계정 설정</a>
                 </nav>
 
@@ -37,7 +37,7 @@
                     <div class="settings-copy">
                         <p class="eyebrow">Settings</p>
                         <h1>계정 설정</h1>
-                        <p class="lead">현재 로그인한 계정의 기본 정보와 보안 관련 설정을 확인하고 필요한 항목만 바로 수정할 수 있습니다.</p>
+                        <p class="lead">현재 로그인한 계정의 기본 정보와 비밀번호를 확인하고 수정할 수 있습니다.</p>
                     </div>
                 </div>
 
@@ -47,7 +47,7 @@
                     <section class="settings-section">
                         <div class="section-head">
                             <h2>기본 프로필</h2>
-                            <p>현재 사용 중인 계정의 기본 정보와 로그인에 사용하는 항목입니다.</p>
+                            <p>현재 사용 중인 계정 정보입니다.</p>
                         </div>
 
                         <div class="summary-list">
@@ -65,13 +65,13 @@
                     <section class="settings-section">
                         <div class="section-head">
                             <h2>빠른 설정</h2>
-                            <p>필요한 설정만 바로 수정할 수 있도록 간단하게 정리했습니다.</p>
+                            <p>필요한 항목을 바로 수정할 수 있습니다.</p>
                         </div>
 
                         <div class="quick-actions account-actions">
                             <a class="button primary" th:href="@{/me/name}">이름 변경</a>
                             <a class="button secondary" th:href="@{/me/password}">비밀번호 변경</a>
-                            <a class="button ghost" th:href="@{/dashboard}">일정 홈으로 돌아가기</a>
+                            <a class="button ghost" th:href="@{/dashboard}">일정표로 돌아가기</a>
                         </div>
                     </section>
                 </div>

@@ -1,10 +1,10 @@
 app:
   jdbc:
     url: ${DB_URL:jdbc:mysql://localhost:3306/memberdb?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
-    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:1234}
 
+# 아래 설정이 있어서 sql 파일이 실행됨, 템플릿을 매 요청마다 다시 읽음
 spring:
   sql:
     init:

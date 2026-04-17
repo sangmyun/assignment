@@ -30,7 +30,11 @@ public class DashboardController {
          *     return "redirect:/login";
          * }
          */
-        String loginId = (String) request.getAttribute(LoginCheckInterceptor.LOGIN_ID_ATTRIBUTE);
+
+
+        // dashboard로 요청이 들어오면 WebConifg 파일을 참고해서 LonginCehckInterceptor 클래스의 preHandle() 메소드가 검사를 함. 이때 preHandle() 메소드는 스프링에서 자동으로 실행해줌
+        // 요청 객체에서 key가 login인 값을 가져와 string으로 캐스팅
+        String loginId = (String) request.getAttribute(LoginCheckInterceptor.LOGIN_ID_ATTRIBUTE);//loginId
         Member member = memberService.findByLoginId(loginId);
         model.addAttribute("m", member);
         return "dashboard/index";

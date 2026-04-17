@@ -18,7 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
     */
 
-    // 서버를 시작할때 아래 규칙을 등록 -> 스프링이 기억해두고 그 규칙대로 호출 여부 결정
+    // 적용 범위를 정의, 등록된 경로에 요청이 들어오면 인터셉터 실행
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginCheckInterceptor)

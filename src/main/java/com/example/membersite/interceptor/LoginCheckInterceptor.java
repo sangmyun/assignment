@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+// 검사 로직 실행
 @Component
 @RequiredArgsConstructor
 public class LoginCheckInterceptor implements HandlerInterceptor {
@@ -22,9 +23,6 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         this.sessionManager = sessionManager;
     }
     */
-
-
-
 
 
     // true: DispatcherServlet이 컨트롤러로 진행

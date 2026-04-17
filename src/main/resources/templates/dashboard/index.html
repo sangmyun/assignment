@@ -14,15 +14,24 @@
                 <div class="sidebar-brand">
                     <p class="eyebrow">Planner</p>
                     <h2>일정 관리</h2>
+<<<<<<< HEAD
                     <p class="sidebar-subtitle">날짜를 선택하고 계획을 입력하며 일정을 정리할 수 있습니다.</p>
                 </div>
 
                 <nav class="sidebar-nav">
                     <a class="sidebar-link active" th:href="@{/dashboard}">일정표</a>
+=======
+                    <p class="sidebar-subtitle" th:text="|${member.name}님, 오늘 계획을 정리하세요.|">오늘 계획을 정리하세요.</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a class="sidebar-link active" th:href="@{/dashboard}">일정</a>
+>>>>>>> 6926320 (nointercepter)
                     <a class="sidebar-link" th:href="@{/me}">계정 정보</a>
                 </nav>
 
                 <div class="sidebar-section">
+<<<<<<< HEAD
                     <h3>현재 계정</h3>
                     <p class="sidebar-subtitle">
                         <strong th:text="${m.name}"></strong>님
@@ -35,6 +44,8 @@
                 </div>
 
                 <div class="sidebar-section">
+=======
+>>>>>>> 6926320 (nointercepter)
                     <form th:action="@{/logout}" method="post" class="full-form">
                         <button class="button ghost full-width" type="submit">로그아웃</button>
                     </form>
@@ -45,8 +56,13 @@
         <main class="planner-main">
             <section class="card planner-hero">
                 <p class="eyebrow">Calendar</p>
+<<<<<<< HEAD
                 <h1><span th:text="${m.name}">홍길동</span>님의 일정 관리 대시보드</h1>
                 <p class="lead">달력에서 날짜를 선택하고 계획을 입력해 보세요. 선택한 날짜의 일정을 바로 확인할 수 있습니다.</p>
+=======
+                <h1>일정 관리 대시보드</h1>
+                <p class="lead">날짜를 선택하고 일정을 추가하세요.</p>
+>>>>>>> 6926320 (nointercepter)
 
                 <div class="planner-summary">
                     <div class="summary-chip">
@@ -69,8 +85,13 @@
                     <div class="calendar-head">
                         <button id="prevMonthButton" class="icon-button" type="button">이전</button>
                         <div>
+<<<<<<< HEAD
                             <h2 id="calendarTitle">2026.3</h2>
                             <p id="selectedDateText" class="calendar-subtitle">날짜를 선택해 주세요.</p>
+=======
+                            <h2 id="calendarTitle"></h2>
+                            <p id="selectedDateText" class="calendar-subtitle">날짜를 선택하세요.</p>
+>>>>>>> 6926320 (nointercepter)
                         </div>
                         <button id="nextMonthButton" class="icon-button" type="button">다음</button>
                     </div>
@@ -90,18 +111,27 @@
 
                 <section class="card schedule-card">
                     <div class="panel-head">
+<<<<<<< HEAD
                         <h2>계획 입력</h2>
                         <p>선택한 날짜에 맞는 일정을 추가하고 목록을 확인할 수 있습니다.</p>
+=======
+                        <h2>일정 입력</h2>
+                        <p>선택한 날짜에 추가할 일정을 입력하세요.</p>
+>>>>>>> 6926320 (nointercepter)
                     </div>
 
-                    <label for="scheduleInput">계획</label>
+                    <label for="scheduleInput">일정</label>
                     <textarea id="scheduleInput" class="text-area" rows="5" placeholder="예: 오후 3시 발표 준비"></textarea>
 
                     <div class="actions">
                         <button id="saveScheduleButton" class="button primary" type="button">저장</button>
                     </div>
 
+<<<<<<< HEAD
                     <p id="scheduleStatus" class="hint">날짜를 선택하면 해당 날짜의 일정을 볼 수 있습니다.</p>
+=======
+                    <p id="scheduleStatus" class="hint">날짜를 선택하면 해당 날짜의 일정이 표시됩니다.</p>
+>>>>>>> 6926320 (nointercepter)
 
                     <div class="panel-head list-head">
                         <h2>선택한 날짜의 일정</h2>

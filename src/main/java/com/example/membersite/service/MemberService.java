@@ -8,6 +8,10 @@ package com.example.membersite.service;
 import com.example.membersite.dto.SignupForm;
 import com.example.membersite.entity.Member;
 import com.example.membersite.repository.MemberRepository;
+<<<<<<< HEAD
+=======
+import java.util.NoSuchElementException;
+>>>>>>> 6926320 (nointercepter)
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,6 +42,7 @@ public class MemberService {
     // Optional을 서비스 계층에서 해석해, 없으면 예외를 던진다.
     // 반환: 조회된 회원 객체, 없으면 예외 발생
     public Member findByLoginId(String loginId) {
+<<<<<<< HEAD
         Member member = memberRepository.findByLoginId(loginId);
         if (member == null) {
             throw new IllegalArgumentException("Member not found.");
@@ -61,21 +66,46 @@ public class MemberService {
         }
 
         return password.equals(member.getPassword());
+=======
+        return memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
+    }
+
+    public Member login(String loginId, String password) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다."));
+        if (!member.getPassword().equals(password)) {
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
+        }
+        return member;
+>>>>>>> 6926320 (nointercepter)
     }
 
     public void updateName(String loginId, String name) {
+<<<<<<< HEAD
         Member member = findByLoginId(loginId);
         memberRepository.updateName(member.getId(), name);
+=======
+        memberRepository.updateName(loginId, name);
+>>>>>>> 6926320 (nointercepter)
     }
 
     // 반환: 현재 비밀번호가 회원의 비밀번호와 일치하면 true, 아니면 false
     public boolean matchesPassword(String loginId, String rawPassword) {
         Member member = findByLoginId(loginId);
+<<<<<<< HEAD
         return rawPassword.equals(member.getPassword());
+=======
+        return member.getPassword().equals(rawPassword);
+>>>>>>> 6926320 (nointercepter)
     }
 
     public void updatePassword(String loginId, String newPassword) {
+<<<<<<< HEAD
         Member member = findByLoginId(loginId);
         memberRepository.updatePassword(member.getId(), newPassword);
+=======
+        memberRepository.updatePassword(loginId, newPassword);
+>>>>>>> 6926320 (nointercepter)
     }
 }

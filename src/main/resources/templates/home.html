@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일정 관리</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page">
+    <div class="card hero-card">
+        <p class="eyebrow">Planner</p>
+        <h1>일정 관리</h1>
+        <p class="lead">계속하려면 로그인하거나 새 계정을 만드세요.</p>
+
+        <div class="actions">
+            <a class="button primary" th:href="@{/login}">로그인</a>
+            <a class="button secondary" th:href="@{/signup}">회원가입</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

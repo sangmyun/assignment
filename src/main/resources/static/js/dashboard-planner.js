@@ -48,6 +48,7 @@
         return month + "월 " + day + "일 (" + weekday + ")";
     }
 
+<<<<<<< HEAD
     // JSON 요청용 공통 헤더를 만든다.
     function createHeaders() {
         return {
@@ -62,6 +63,15 @@
             window.location.href = "/login";
             return [];
         }
+=======
+    async function fetchMonthlySchedules() {
+        const response = await fetch("/api/schedules?year=" + currentYear + "&month=" + currentMonth);
+        monthlySchedules = await response.json();
+    }
+
+    async function fetchDailySchedules(date) {
+        const response = await fetch("/api/schedules/daily?date=" + date);
+>>>>>>> 6926320 (nointercepter)
         return response.json();
     }
 
@@ -150,7 +160,11 @@
         dailyScheduleList.innerHTML = "";
 
         if (schedules.length === 0) {
+<<<<<<< HEAD
             dailyScheduleList.innerHTML = "<div class='empty-state'>선택한 날짜에 등록된 일정이 없습니다.</div>";
+=======
+            dailyScheduleList.innerHTML = "<div class='empty-state'>아직 등록된 일정이 없습니다.</div>";
+>>>>>>> 6926320 (nointercepter)
             return;
         }
 
@@ -177,13 +191,19 @@
         const content = scheduleInput.value.trim();
 
         if (!content) {
+<<<<<<< HEAD
             scheduleStatus.textContent = "일정 내용을 입력하세요.";
+=======
+            scheduleStatus.textContent = "일정 내용을 입력해주세요.";
+>>>>>>> 6926320 (nointercepter)
             return;
         }
 
         const response = await fetch("/api/schedules", {
             method: "POST",
-            headers: createHeaders(),
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
                 date: selectedDate,
                 content: content
@@ -209,8 +229,7 @@
     // 선택한 일정 하나를 서버에 삭제 요청한다.
     async function deleteSchedule(scheduleId) {
         const response = await fetch("/api/schedules/" + scheduleId + "/delete", {
-            method: "POST",
-            headers: createHeaders()
+            method: "POST"
         });
 
         if (response.status === 401) {

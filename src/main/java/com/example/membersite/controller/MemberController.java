@@ -5,12 +5,18 @@
  */
 package com.example.membersite.controller;
 
+import com.example.membersite.config.SessionConst;
 import com.example.membersite.dto.UpdateNameForm;
 import com.example.membersite.dto.UpdatePasswordForm;
 import com.example.membersite.entity.Member;
 import com.example.membersite.service.MemberService;
+<<<<<<< HEAD
 import com.example.membersite.support.SessionManager;
 import jakarta.servlet.http.HttpServletRequest;
+=======
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+>>>>>>> 6926320 (nointercepter)
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +37,7 @@ public class MemberController {
 
     // 반환: 내 정보 화면 이름 또는 비로그인 사용자의 로그인 화면 리다이렉트 경로
     @GetMapping("/me")
+<<<<<<< HEAD
     public String profile(HttpServletRequest request, Model model) {
         String loginId = sessionManager.getLoginId(request);
         if (loginId == null) {
@@ -38,12 +45,17 @@ public class MemberController {
         }
 
         Member member = memberService.findByLoginId(loginId);
+=======
+    public String profile(HttpSession session, Model model) {
+        Member member = memberService.findByLoginId(loginId(session));
+>>>>>>> 6926320 (nointercepter)
         model.addAttribute("member", member);
         return "member/account";
     }
 
     // 반환: 이름 수정 화면 이름 또는 비로그인 사용자의 로그인 화면 리다이렉트 경로
     @GetMapping("/me/name")
+<<<<<<< HEAD
     public String editNameForm(HttpServletRequest request, Model model) {
         String loginId = sessionManager.getLoginId(request);
         if (loginId == null) {
@@ -51,6 +63,10 @@ public class MemberController {
         }
 
         Member member = memberService.findByLoginId(loginId);
+=======
+    public String editNameForm(HttpSession session, Model model) {
+        Member member = memberService.findByLoginId(loginId(session));
+>>>>>>> 6926320 (nointercepter)
         UpdateNameForm form = new UpdateNameForm();
         form.setName(member.getName());
         model.addAttribute("updateNameForm", form);
@@ -64,9 +80,15 @@ public class MemberController {
      */
     // 반환: 검증 실패 시 이름 수정 화면 이름, 성공 시 내 정보 화면 리다이렉트 경로
     @PostMapping("/me/name")
+<<<<<<< HEAD
     public String editName(HttpServletRequest request,
                            @ModelAttribute UpdateNameForm updateNameForm,
                            Model model,
+=======
+    public String editName(HttpSession session,
+                           @Valid @ModelAttribute UpdateNameForm updateNameForm,
+                           BindingResult bindingResult,
+>>>>>>> 6926320 (nointercepter)
                            RedirectAttributes redirectAttributes) {
         String loginId = sessionManager.getLoginId(request);
         if (loginId == null) {
@@ -78,6 +100,7 @@ public class MemberController {
             return "member/edit-name";
         }
 
+<<<<<<< HEAD
         if (updateNameForm.getName().length() > 30) {
             model.addAttribute("nameError", "이름은 30자 이하로 입력하세요.");
             return "member/edit-name";
@@ -85,6 +108,10 @@ public class MemberController {
 
         memberService.updateName(loginId, updateNameForm.getName());
         redirectAttributes.addFlashAttribute("message", "Name updated.");
+=======
+        memberService.updateName(loginId(session), updateNameForm.getName());
+        redirectAttributes.addFlashAttribute("message", "이름이 변경되었습니다.");
+>>>>>>> 6926320 (nointercepter)
         return "redirect:/me";
     }
 
@@ -106,6 +133,7 @@ public class MemberController {
      */
     // 반환: 검증 실패 시 비밀번호 수정 화면 이름, 성공 시 내 정보 화면 리다이렉트 경로
     @PostMapping("/me/password")
+<<<<<<< HEAD
     public String editPassword(HttpServletRequest request,
                                @ModelAttribute UpdatePasswordForm updatePasswordForm,
                                Model model,
@@ -120,6 +148,23 @@ public class MemberController {
         if (updatePasswordForm.getCurrentPassword() == null || updatePasswordForm.getCurrentPassword().isBlank()) {
             model.addAttribute("currentPasswordError", "현재 비밀번호를 입력하세요.");
             hasError = true;
+=======
+    public String editPassword(HttpSession session,
+                               @Valid @ModelAttribute UpdatePasswordForm updatePasswordForm,
+                               BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes) {
+        String loginId = loginId(session);
+
+        if (!bindingResult.hasFieldErrors("newPassword")
+                && !bindingResult.hasFieldErrors("newPasswordConfirm")
+                && !updatePasswordForm.newPasswordMatches()) {
+            bindingResult.rejectValue("newPasswordConfirm", "password.mismatch", "새 비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        if (!bindingResult.hasFieldErrors("currentPassword")
+                && !memberService.matchesPassword(loginId, updatePasswordForm.getCurrentPassword())) {
+            bindingResult.rejectValue("currentPassword", "password.invalid", "현재 비밀번호가 올바르지 않습니다.");
+>>>>>>> 6926320 (nointercepter)
         }
 
         if (updatePasswordForm.getNewPassword() == null || updatePasswordForm.getNewPassword().isBlank()) {
@@ -149,7 +194,15 @@ public class MemberController {
         }
 
         memberService.updatePassword(loginId, updatePasswordForm.getNewPassword());
+<<<<<<< HEAD
         redirectAttributes.addFlashAttribute("message", "Password updated.");
+=======
+        redirectAttributes.addFlashAttribute("message", "비밀번호가 변경되었습니다.");
+>>>>>>> 6926320 (nointercepter)
         return "redirect:/me";
+    }
+
+    private String loginId(HttpSession session) {
+        return (String) session.getAttribute(SessionConst.LOGIN_MEMBER);
     }
 }

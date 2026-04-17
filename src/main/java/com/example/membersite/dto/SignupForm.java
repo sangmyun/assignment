@@ -5,9 +5,14 @@ import jakarta.validation.constraints.Size;
 
 public class SignupForm {
 
+<<<<<<< HEAD
     // 검증 애너테이션은 컨트롤러의 @Valid와 함께 동작한다.
     @NotBlank(message = "로그인 아이디를 입력하세요.")
     @Size(min = 4, max = 20, message = "로그인 아이디는 4자 이상 20자 이하로 입력하세요.")
+=======
+    @NotBlank(message = "아이디를 입력하세요.")
+    @Size(min = 4, max = 20, message = "아이디는 4자 이상 20자 이하로 입력하세요.")
+>>>>>>> 6926320 (nointercepter)
     private String loginId;
 
     @NotBlank(message = "비밀번호를 입력하세요.")

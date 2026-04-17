@@ -5,6 +5,7 @@ CREATE DATABASE IF NOT EXISTS memberdb
 USE memberdb;
 
 CREATE TABLE IF NOT EXISTS members (
+<<<<<<< HEAD
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     login_id VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -18,4 +19,22 @@ CREATE TABLE IF NOT EXISTS schedules (
     content VARCHAR(100) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     CONSTRAINT fk_schedules_member FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
+=======
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    login_id VARCHAR(20) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(30) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL
+);
+
+CREATE TABLE IF NOT EXISTS schedules (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    member_id BIGINT NOT NULL,
+    plan_date DATE NOT NULL,
+    content VARCHAR(100) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    CONSTRAINT fk_schedules_member FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
+>>>>>>> 6926320 (nointercepter)
 );

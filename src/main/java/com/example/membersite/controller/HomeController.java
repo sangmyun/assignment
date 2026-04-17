@@ -5,8 +5,13 @@
  */
 package com.example.membersite.controller;
 
+<<<<<<< HEAD
 import com.example.membersite.support.SessionManager;
 import jakarta.servlet.http.HttpServletRequest;
+=======
+import com.example.membersite.config.SessionConst;
+import jakarta.servlet.http.HttpSession;
+>>>>>>> 6926320 (nointercepter)
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -22,12 +27,23 @@ public class HomeController {
     // 첫 화면에서는 로그인 여부만 확인하고, 비로그인 사용자에게 홈 화면을 보여 준다.
     // 반환: 홈 화면 이름 또는 로그인 사용자의 대시보드 리다이렉트 경로
     @GetMapping("/")
+<<<<<<< HEAD
     public String home(HttpServletRequest request) {
         String loginId = sessionManager.getLoginId(request);
+=======
+    public String home(Model model, HttpSession session) {
+        String loginId = session == null ? null : (String) session.getAttribute(SessionConst.LOGIN_MEMBER);
+>>>>>>> 6926320 (nointercepter)
         if (loginId != null) {
             return "redirect:/dashboard";
         }
 
+<<<<<<< HEAD
         return "redirect:/login";
+=======
+        model.addAttribute("authenticated", false);
+        model.addAttribute("loginId", null);
+        return "home";
+>>>>>>> 6926320 (nointercepter)
     }
 }

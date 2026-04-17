@@ -5,23 +5,43 @@
  */
 package com.example.membersite.entity;
 
+<<<<<<< HEAD
 public class Member {
 
     // members 테이블 한 행을 자바 객체로 표현한다.
+=======
+import java.time.LocalDateTime;
+
+public class Member {
+
+>>>>>>> 6926320 (nointercepter)
     private Long id;
     private String loginId;
     private String password;
     private String name;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
+<<<<<<< HEAD
     // 프레임워크가 필요로 하는 기본 생성자다.
     public Member() {
     }
 
     // 회원가입 입력값으로 새 회원 객체를 만들 때 사용한다.
     public Member(String loginId, String password, String name) {
+=======
+    public Member(Long id, String loginId, String password, String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+>>>>>>> 6926320 (nointercepter)
         this.loginId = loginId;
         this.password = password;
         this.name = name;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Member(String loginId, String password, String name) {
+        this(null, loginId, password, name, null, null);
     }
 
     // DB에서 읽어온 회원은 id까지 포함해 복원한다.
@@ -51,4 +71,23 @@ public class Member {
     public String getName() {
         return name;
     }
+<<<<<<< HEAD
+=======
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void changeName(String name) {
+        this.name = name;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
+>>>>>>> 6926320 (nointercepter)
 }

@@ -6,11 +6,19 @@
  */
 package com.example.membersite.controller;
 
+import com.example.membersite.config.SessionConst;
 import com.example.membersite.dto.SignupForm;
+import com.example.membersite.entity.Member;
 import com.example.membersite.service.MemberService;
+<<<<<<< HEAD
 import com.example.membersite.support.SessionManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+=======
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+>>>>>>> 6926320 (nointercepter)
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +39,13 @@ public class AuthController {
 
     // 반환: 회원가입 화면 이름 또는 이미 로그인된 경우 대시보드 리다이렉트 경로
     @GetMapping("/signup")
+<<<<<<< HEAD
     public String signupForm(Model model, HttpServletRequest request) {
         if (sessionManager.getLoginId(request) != null) {
+=======
+    public String signupForm(Model model, HttpSession session) {
+        if (isLoggedIn(session)) {
+>>>>>>> 6926320 (nointercepter)
             return "redirect:/dashboard";
         }
 
@@ -47,6 +60,7 @@ public class AuthController {
      */
     // 반환: 검증 실패 시 회원가입 화면 이름, 성공 시 로그인 화면 리다이렉트 경로
     @PostMapping("/signup")
+<<<<<<< HEAD
     public String signup(@ModelAttribute SignupForm signupForm, Model model) {
         boolean hasError = false;
 
@@ -64,6 +78,18 @@ public class AuthController {
         } else if (signupForm.getPassword().length() < 4 || signupForm.getPassword().length() > 100) {
             model.addAttribute("passwordError", "비밀번호는 4자 이상 입력하세요.");
             hasError = true;
+=======
+    public String signup(@Valid @ModelAttribute SignupForm signupForm, BindingResult bindingResult) {
+        if (!bindingResult.hasFieldErrors("password")
+                && !bindingResult.hasFieldErrors("passwordConfirm")
+                && !signupForm.passwordMatches()) {
+            bindingResult.rejectValue("passwordConfirm", "password.mismatch", "비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        if (!bindingResult.hasFieldErrors("loginId")
+                && memberService.isDuplicatedLoginId(signupForm.getLoginId())) {
+            bindingResult.rejectValue("loginId", "loginId.duplicate", "이미 사용 중인 아이디입니다.");
+>>>>>>> 6926320 (nointercepter)
         }
 
         if (signupForm.getPasswordConfirm() == null || signupForm.getPasswordConfirm().isBlank()) {
@@ -97,13 +123,19 @@ public class AuthController {
 
     // 반환: 로그인 화면 이름 또는 이미 로그인된 경우 대시보드 리다이렉트 경로
     @GetMapping("/login")
+<<<<<<< HEAD
     public String login(HttpServletRequest request) {
         if (sessionManager.getLoginId(request) != null) {
+=======
+    public String loginForm(HttpSession session) {
+        if (isLoggedIn(session)) {
+>>>>>>> 6926320 (nointercepter)
             return "redirect:/dashboard";
         }
         return "auth/login";
     }
 
+<<<<<<< HEAD
     // 반환: 로그인 실패 시 에러 리다이렉트 경로, 성공 시 대시보드 리다이렉트 경로
     @PostMapping("/login")
     public String login(@RequestParam String loginId,
@@ -123,4 +155,34 @@ public class AuthController {
         sessionManager.expire(request, response);
         return "redirect:/login?logout";
     }
+=======
+    @PostMapping("/login")
+    public String login(@RequestParam String loginId,
+                        @RequestParam String password,
+                        HttpServletRequest request,
+                        Model model) {
+        try {
+            Member member = memberService.login(loginId, password);
+            HttpSession session = request.getSession();
+            session.setAttribute(SessionConst.LOGIN_MEMBER, member.getLoginId());
+            return "redirect:/dashboard";
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("loginError", exception.getMessage());
+            return "auth/login";
+        }
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return "redirect:/login?logout";
+    }
+
+    private boolean isLoggedIn(HttpSession session) {
+        return session != null && session.getAttribute(SessionConst.LOGIN_MEMBER) != null;
+    }
+>>>>>>> 6926320 (nointercepter)
 }

@@ -11,17 +11,21 @@
     <div class="card form-card">
         <p class="eyebrow">Profile</p>
         <h1>이름 변경</h1>
+<<<<<<< HEAD
         <p class="lead">계정에 표시되는 이름을 수정할 수 있습니다.</p>
+=======
+        <p class="lead">계정에 표시할 이름을 수정하세요.</p>
+>>>>>>> 6926320 (nointercepter)
 
         <form th:action="@{/me/name}" th:object="${updateNameForm}" method="post">
             <label for="name">이름</label>
             <input id="name" th:field="*{name}" type="text" placeholder="이름 입력">
             <p class="field-error" th:if="${nameError}" th:text="${nameError}"></p>
 
-            <button class="button primary full" type="submit">이름 저장</button>
+            <button class="button primary full" type="submit">저장</button>
         </form>
 
-        <p class="sub-link"><a th:href="@{/me}">계정 설정으로 돌아가기</a></p>
+        <p class="sub-link"><a th:href="@{/me}">계정 정보로 돌아가기</a></p>
     </div>
 </div>
 </body>

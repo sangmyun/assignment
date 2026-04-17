@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>계정 설정</title>
+    <title>계정 정보</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -13,6 +13,7 @@
             <div class="card sidebar-card">
                 <div class="sidebar-brand">
                     <p class="eyebrow">Account</p>
+<<<<<<< HEAD
                     <h2>계정 설정</h2>
                     <p class="sidebar-subtitle">기본 정보와 계정 설정을 확인하고 관리할 수 있습니다.</p>
                 </div>
@@ -20,6 +21,15 @@
                 <nav class="sidebar-nav">
                     <a class="sidebar-link" th:href="@{/dashboard}">일정표</a>
                     <a class="sidebar-link active" th:href="@{/me}">계정 설정</a>
+=======
+                    <h2>계정 정보</h2>
+                    <p class="sidebar-subtitle">기본 정보와 비밀번호를 관리하세요.</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a class="sidebar-link" th:href="@{/dashboard}">일정</a>
+                    <a class="sidebar-link active" th:href="@{/me}">계정 정보</a>
+>>>>>>> 6926320 (nointercepter)
                 </nav>
 
                 <div class="sidebar-section">
@@ -36,8 +46,13 @@
                     <div class="avatar" th:text="${#strings.substring(member.name, 0, 1)}">A</div>
                     <div class="settings-copy">
                         <p class="eyebrow">Settings</p>
+<<<<<<< HEAD
                         <h1>계정 설정</h1>
                         <p class="lead">현재 로그인한 계정의 기본 정보와 비밀번호를 확인하고 수정할 수 있습니다.</p>
+=======
+                        <h1>계정 정보</h1>
+                        <p class="lead">현재 로그인한 계정의 정보를 확인하고 수정하세요.</p>
+>>>>>>> 6926320 (nointercepter)
                     </div>
                 </div>
 
@@ -47,12 +62,16 @@
                     <section class="settings-section">
                         <div class="section-head">
                             <h2>기본 프로필</h2>
+<<<<<<< HEAD
                             <p>현재 사용 중인 계정 정보입니다.</p>
+=======
+                            <p>로그인에 사용하는 아이디와 화면에 표시되는 이름입니다.</p>
+>>>>>>> 6926320 (nointercepter)
                         </div>
 
                         <div class="summary-list">
                             <div class="summary-item">
-                                <span class="summary-label">로그인 아이디</span>
+                                <span class="summary-label">아이디</span>
                                 <strong th:text="${member.loginId}">hong</strong>
                             </div>
                             <div class="summary-item">
@@ -64,14 +83,23 @@
 
                     <section class="settings-section">
                         <div class="section-head">
+<<<<<<< HEAD
                             <h2>빠른 설정</h2>
                             <p>필요한 항목을 바로 수정할 수 있습니다.</p>
+=======
+                            <h2>설정</h2>
+                            <p>필요한 항목만 바로 수정할 수 있습니다.</p>
+>>>>>>> 6926320 (nointercepter)
                         </div>
 
                         <div class="quick-actions account-actions">
                             <a class="button primary" th:href="@{/me/name}">이름 변경</a>
                             <a class="button secondary" th:href="@{/me/password}">비밀번호 변경</a>
+<<<<<<< HEAD
                             <a class="button ghost" th:href="@{/dashboard}">일정표로 돌아가기</a>
+=======
+                            <a class="button ghost" th:href="@{/dashboard}">일정으로 돌아가기</a>
+>>>>>>> 6926320 (nointercepter)
                         </div>
                     </section>
                 </div>

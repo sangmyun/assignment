@@ -1,16 +1,31 @@
+<<<<<<< HEAD
 app:
   jdbc:
+=======
+spring:
+  datasource:
+>>>>>>> 6926320 (nointercepter)
     url: ${DB_URL:jdbc:mysql://localhost:3306/memberdb?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
     driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:1234}
+<<<<<<< HEAD
 
 spring:
   sql:
     init:
       mode: always
+=======
+>>>>>>> 6926320 (nointercepter)
   thymeleaf:
     cache: false
+  sql:
+    init:
+      mode: always
 
 server:
+<<<<<<< HEAD
   port: ${SERVER_PORT:8081}
+=======
+  port: ${SERVER_PORT:8080}
+>>>>>>> 6926320 (nointercepter)

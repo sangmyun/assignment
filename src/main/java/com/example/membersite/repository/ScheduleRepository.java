@@ -6,19 +6,28 @@
 package com.example.membersite.repository;
 
 import com.example.membersite.entity.Schedule;
+<<<<<<< HEAD
 import com.example.membersite.support.JdbcConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+=======
+>>>>>>> 6926320 (nointercepter)
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+<<<<<<< HEAD
+=======
+import java.util.Optional;
+import org.springframework.jdbc.core.JdbcTemplate;
+>>>>>>> 6926320 (nointercepter)
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ScheduleRepository {
 
+<<<<<<< HEAD
     private static final String FIND_BY_MEMBER_ID_AND_PLAN_DATE_BETWEEN_SQL = """
             select id, member_id, plan_date, content, created_at
             from schedules
@@ -283,5 +292,79 @@ public class ScheduleRepository {
     @FunctionalInterface
     private interface StatementSetter {
         void setValues(PreparedStatement statement) throws SQLException;
+=======
+    private final JdbcTemplate jdbcTemplate;
+
+    public ScheduleRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public Schedule save(Schedule schedule) {
+        jdbcTemplate.update(
+                "insert into schedules (member_id, plan_date, content) values (?, ?, ?)",
+                schedule.getMemberId(),
+                schedule.getPlanDate(),
+                schedule.getContent()
+        );
+        return findLatestByMemberAndDate(schedule.getMemberId(), schedule.getPlanDate()).orElseThrow();
+    }
+
+    public List<Schedule> findByMemberAndPlanDateBetweenOrderByPlanDateAscIdAsc(Member member, LocalDate startDate, LocalDate endDate) {
+        return jdbcTemplate.query(
+                "select id, member_id, plan_date, content from schedules "
+                        + "where member_id = ? and plan_date between ? and ? order by plan_date asc, id asc",
+                this::mapRow,
+                member.getId(),
+                startDate,
+                endDate
+        );
+    }
+
+    public List<Schedule> findByMemberAndPlanDateOrderByIdAsc(Member member, LocalDate planDate) {
+        return jdbcTemplate.query(
+                "select id, member_id, plan_date, content from schedules "
+                        + "where member_id = ? and plan_date = ? order by id asc",
+                this::mapRow,
+                member.getId(),
+                planDate
+        );
+    }
+
+    public Optional<Schedule> findByIdAndMember(Long id, Member member) {
+        List<Schedule> schedules = jdbcTemplate.query(
+                "select id, member_id, plan_date, content from schedules where id = ? and member_id = ?",
+                this::mapRow,
+                id,
+                member.getId()
+        );
+        return schedules.stream().findFirst();
+    }
+
+    public void delete(Schedule schedule) {
+        jdbcTemplate.update("delete from schedules where id = ?", schedule.getId());
+    }
+
+    private Optional<Schedule> findLatestByMemberAndDate(Long memberId, LocalDate planDate) {
+        List<Schedule> schedules = jdbcTemplate.query(
+                "select id, member_id, plan_date, content from schedules "
+                        + "where member_id = ? and plan_date = ? order by id desc limit 1",
+                this::mapRow,
+                memberId,
+                planDate
+        );
+        return schedules.stream().findFirst();
+    }
+
+    private Schedule mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new Schedule(
+                rs.getLong("id"),
+                rs.getLong("member_id"),
+                null,
+                rs.getDate("plan_date").toLocalDate(),
+                rs.getString("content"),
+                null,
+                null
+        );
+>>>>>>> 6926320 (nointercepter)
     }
 }

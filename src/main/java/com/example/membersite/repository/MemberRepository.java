@@ -6,16 +6,25 @@
 package com.example.membersite.repository;
 
 import com.example.membersite.entity.Member;
+<<<<<<< HEAD
 import com.example.membersite.support.JdbcConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+=======
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.jdbc.core.JdbcTemplate;
+>>>>>>> 6926320 (nointercepter)
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class MemberRepository {
 
+<<<<<<< HEAD
     private static final String INSERT_MEMBER_SQL =
             "insert into members (login_id, password, name) values (?, ?, ?)";
     private static final String COUNT_BY_LOGIN_ID_SQL =
@@ -243,5 +252,75 @@ public class MemberRepository {
     @FunctionalInterface
     private interface StatementSetter {
         void setValues(PreparedStatement statement) throws SQLException;
+=======
+    private final JdbcTemplate jdbcTemplate;
+
+    public MemberRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public Member save(Member member) {
+        jdbcTemplate.update(
+                "insert into members (login_id, password, name) values (?, ?, ?)",
+                member.getLoginId(),
+                member.getPassword(),
+                member.getName()
+        );
+        return findByLoginId(member.getLoginId()).orElseThrow();
+    }
+
+    public boolean existsByLoginId(String loginId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from members where login_id = ?",
+                Integer.class,
+                loginId
+        );
+        return count != null && count > 0;
+    }
+
+    public Optional<Member> findByLoginId(String loginId) {
+        List<Member> members = jdbcTemplate.query(
+                "select id, login_id, password, name from members where login_id = ?",
+                this::mapRow,
+                loginId
+        );
+        return members.stream().findFirst();
+    }
+
+    public Optional<Member> findById(Long id) {
+        List<Member> members = jdbcTemplate.query(
+                "select id, login_id, password, name from members where id = ?",
+                this::mapRow,
+                id
+        );
+        return members.stream().findFirst();
+    }
+
+    public void updateName(String loginId, String name) {
+        jdbcTemplate.update(
+                "update members set name = ? where login_id = ?",
+                name,
+                loginId
+        );
+    }
+
+    public void updatePassword(String loginId, String password) {
+        jdbcTemplate.update(
+                "update members set password = ? where login_id = ?",
+                password,
+                loginId
+        );
+    }
+
+    private Member mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new Member(
+                rs.getLong("id"),
+                rs.getString("login_id"),
+                rs.getString("password"),
+                rs.getString("name"),
+                null,
+                null
+        );
+>>>>>>> 6926320 (nointercepter)
     }
 }

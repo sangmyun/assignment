@@ -13,6 +13,7 @@ import com.example.membersite.repository.ScheduleRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -68,11 +69,17 @@ public class ScheduleService {
     // 삭제 전에 본인 일정인지 확인해 다른 사용자의 데이터를 건드리지 않게 한다.
     public void delete(String loginId, Long scheduleId) {
         Member member = memberService.findByLoginId(loginId);
+<<<<<<< HEAD
         Schedule schedule = scheduleRepository.findByIdAndMemberId(scheduleId, member.getId());
         if (schedule == null) {
             throw new IllegalArgumentException("Schedule not found.");
         }
         scheduleRepository.deleteById(schedule.getId());
+=======
+        Schedule schedule = scheduleRepository.findByIdAndMember(scheduleId, member)
+                .orElseThrow(() -> new NoSuchElementException("일정을 찾을 수 없습니다."));
+        scheduleRepository.delete(schedule);
+>>>>>>> 6926320 (nointercepter)
     }
 
     private void validate(ScheduleCreateRequest request) {
@@ -81,11 +88,19 @@ public class ScheduleService {
         }
 
         if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+<<<<<<< HEAD
             throw new IllegalArgumentException("Content is required.");
         }
 
         if (request.getContent().trim().length() > 100) {
             throw new IllegalArgumentException("Content must be 100 characters or less.");
+=======
+            throw new IllegalArgumentException("일정 내용을 입력해주세요.");
+        }
+
+        if (request.getContent().trim().length() > 100) {
+            throw new IllegalArgumentException("일정 내용은 100자 이하로 입력해주세요.");
+>>>>>>> 6926320 (nointercepter)
         }
     }
 }

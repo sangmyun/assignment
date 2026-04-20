@@ -31,7 +31,7 @@ public class JwtTokenProvider {
 
     //로그인 아이디를 넣어서 JWT 문자열을 만듭니다.
     public String createToken(String loginId) {
-        long now = Instant.now().getEpochSecond();
+        long now = Instant.now().getEpochSecond(); // Instant.now() 현재 시각가져오기 ex)  2026-04-20T12:34:56Z , getEpochSecond() 초단위로 바꿈 1713600000
 
         // “키-값 쌍을 담는 Map 객체를 만들고, 거기에 내용을 추가, 고정 값이라서 불변객체
         Map<String, Object> header = Map.of(
@@ -70,6 +70,7 @@ public class JwtTokenProvider {
         }
     }
 
+    /**토큰을 구조 검사 → 서명 검증 → 만료(exp) 검증 순서로 확인해 모두 통과하면 payload를 반환**/
     private Map<String, Object> parseAndValidate(String token) throws Exception {
         String[] parts = token.split("\\.");
         if (parts.length != 3) {
@@ -101,11 +102,16 @@ public class JwtTokenProvider {
         return payload;
     }
 
+
+    /** Map → JSON → Base64(URL-safe, padding 없음) 문자열로 변환**/
+    // 데이터를 안전하게 전달하기해 base64 사용
     private String encodeJson(Map<String, Object> value) throws Exception {
         byte[] jsonBytes = objectMapper.writeValueAsBytes(value);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes);
     }
 
+    /**header.payload를 secret으로 HmacSHA256 서명후 base64인코딩**/
+    // 서명 값을 만들때 입력값을 바이트로 변환해야함, 알고리즘이 바이트 단위로 작동해서
     private String sign(String signingInput) throws GeneralSecurityException {
         if (secret == null || secret.isBlank()) {
             throw new IllegalStateException("app.auth.jwt.secret must not be blank");

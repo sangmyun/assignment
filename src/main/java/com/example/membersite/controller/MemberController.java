@@ -6,9 +6,11 @@ import com.example.membersite.entity.Member;
 import com.example.membersite.interceptor.LoginCheckInterceptor;
 import com.example.membersite.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,21 +22,8 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    /*
-    public MemberController(MemberService memberService) {
-        this.memberService = memberService;
-    }
-    */
-
     @GetMapping("/me")
     public String profile(HttpServletRequest request, Model model) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     return "redirect:/login";
-         * }
-         */
         String loginId = getLoginId(request);
         Member member = memberService.findByLoginId(loginId);
         model.addAttribute("member", member);
@@ -43,13 +32,6 @@ public class MemberController {
 
     @GetMapping("/me/name")
     public String editNameForm(HttpServletRequest request, Model model) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     return "redirect:/login";
-         * }
-         */
         String loginId = getLoginId(request);
         Member member = memberService.findByLoginId(loginId);
 
@@ -61,25 +43,11 @@ public class MemberController {
 
     @PostMapping("/me/name")
     public String editName(HttpServletRequest request,
-                           @ModelAttribute UpdateNameForm updateNameForm,
-                           Model model,
+                           @Valid @ModelAttribute UpdateNameForm updateNameForm,
+                           BindingResult bindingResult,
                            RedirectAttributes redirectAttributes) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     return "redirect:/login";
-         * }
-         */
         String loginId = getLoginId(request);
-
-        if (updateNameForm.getName() == null || updateNameForm.getName().isBlank()) {
-            model.addAttribute("nameError", "이름을 입력하세요.");
-            return "member/edit-name";
-        }
-
-        if (updateNameForm.getName().length() > 30) {
-            model.addAttribute("nameError", "이름은 30자 이하로 입력하세요.");
+        if (bindingResult.hasErrors()) {
             return "member/edit-name";
         }
 
@@ -90,59 +58,29 @@ public class MemberController {
 
     @GetMapping("/me/password")
     public String editPasswordForm(Model model) {
-        /*
-         * previous way
-         * if (sessionManager.getLoginId(request) == null) {
-         *     return "redirect:/login";
-         * }
-         */
         model.addAttribute("updatePasswordForm", new UpdatePasswordForm());
         return "member/edit-password";
     }
 
     @PostMapping("/me/password")
     public String editPassword(HttpServletRequest request,
-                               @ModelAttribute UpdatePasswordForm updatePasswordForm,
-                               Model model,
+                               @Valid @ModelAttribute UpdatePasswordForm updatePasswordForm,
+                               BindingResult bindingResult,
                                RedirectAttributes redirectAttributes) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     return "redirect:/login";
-         * }
-         */
         String loginId = getLoginId(request);
-        boolean hasError = false;
 
-        if (updatePasswordForm.getCurrentPassword() == null || updatePasswordForm.getCurrentPassword().isBlank()) {
-            model.addAttribute("currentPasswordError", "현재 비밀번호를 입력하세요.");
-            hasError = true;
+        if (!bindingResult.hasFieldErrors("newPassword")
+                && !bindingResult.hasFieldErrors("newPasswordConfirm")
+                && !updatePasswordForm.newPasswordMatches()) {
+            bindingResult.rejectValue("newPasswordConfirm", "mismatch", "비밀번호가 일치하지 않습니다.");
         }
 
-        if (updatePasswordForm.getNewPassword() == null || updatePasswordForm.getNewPassword().isBlank()) {
-            model.addAttribute("newPasswordError", "새 비밀번호를 입력하세요.");
-            hasError = true;
-        } else if (updatePasswordForm.getNewPassword().length() < 4
-                || updatePasswordForm.getNewPassword().length() > 100) {
-            model.addAttribute("newPasswordError", "새 비밀번호는 4자 이상 100자 이하로 입력하세요.");
-            hasError = true;
+        if (!bindingResult.hasFieldErrors("currentPassword")
+                && !memberService.matchesPassword(loginId, updatePasswordForm.getCurrentPassword())) {
+            bindingResult.rejectValue("currentPassword", "mismatch", "현재 비밀번호가 올바르지 않습니다.");
         }
 
-        if (updatePasswordForm.getNewPasswordConfirm() == null || updatePasswordForm.getNewPasswordConfirm().isBlank()) {
-            model.addAttribute("newPasswordConfirmError", "새 비밀번호 확인을 입력하세요.");
-            hasError = true;
-        } else if (model.getAttribute("newPasswordError") == null && !updatePasswordForm.newPasswordMatches()) {
-            model.addAttribute("newPasswordConfirmError", "비밀번호가 일치하지 않습니다.");
-            hasError = true;
-        }
-
-        if (!hasError && !memberService.matchesPassword(loginId, updatePasswordForm.getCurrentPassword())) {
-            model.addAttribute("currentPasswordError", "현재 비밀번호가 올바르지 않습니다.");
-            hasError = true;
-        }
-
-        if (hasError) {
+        if (bindingResult.hasErrors()) {
             return "member/edit-password";
         }
 

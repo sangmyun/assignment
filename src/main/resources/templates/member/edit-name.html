@@ -16,7 +16,7 @@
         <form th:action="@{/me/name}" th:object="${updateNameForm}" method="post">
             <label for="name">이름</label>
             <input id="name" th:field="*{name}" type="text" placeholder="이름 입력">
-            <p class="field-error" th:if="${nameError}" th:text="${nameError}"></p>
+            <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
 
             <button class="button primary full" type="submit">이름 저장</button>
         </form>

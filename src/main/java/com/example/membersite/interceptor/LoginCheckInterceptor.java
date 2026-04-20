@@ -1,6 +1,6 @@
 package com.example.membersite.interceptor;
 
-import com.example.membersite.support.SessionManager;
+import com.example.membersite.support.AuthTokenManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +16,12 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     // Interceptor puts loginId here so controllers can reuse it.
     public static final String LOGIN_ID_ATTRIBUTE = "loginId";
 
-    private final SessionManager sessionManager;
+    // private final SessionManager sessionManager;
+    private final AuthTokenManager authTokenManager;
 
     /*
-    public LoginCheckInterceptor(SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
+    public LoginCheckInterceptor(AuthTokenManager authTokenManager) {
+        this.authTokenManager = authTokenManager;
     }
     */
 
@@ -31,7 +32,10 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
+        /*
         String loginId = sessionManager.getLoginId(request);
+        */
+        String loginId = authTokenManager.getLoginId(request);
         if (loginId != null) {
             request.setAttribute(LOGIN_ID_ATTRIBUTE, loginId);
             return true;

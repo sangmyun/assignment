@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SessionManager {
+public class temp_SessionManager {
 
     // 브라우저에는 세션 id만 저장하고, 로그인 정보는 서버 메모리에 둔다.
     private static final String SESSION_COOKIE_NAME = "memberSessionId";

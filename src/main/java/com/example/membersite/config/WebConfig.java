@@ -1,5 +1,6 @@
 package com.example.membersite.config;
 
+import com.example.membersite.interceptor.GuestOnlyInterceptor;
 import com.example.membersite.interceptor.LoginCheckInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
+    private final GuestOnlyInterceptor guestOnlyInterceptor;
     private final LoginCheckInterceptor loginCheckInterceptor;
 
     /*
@@ -21,6 +23,9 @@ public class WebConfig implements WebMvcConfigurer {
     // 적용 범위를 정의, 등록된 경로에 요청이 들어오면 인터셉터 실행
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(guestOnlyInterceptor)
+                .addPathPatterns("/", "/login", "/signup");
+
         registry.addInterceptor(loginCheckInterceptor)
                 // 아래 주소들은 로그인한 사용자만 접근하게 만든다.
                 .addPathPatterns("/dashboard", "/me/**", "/api/schedules/**")

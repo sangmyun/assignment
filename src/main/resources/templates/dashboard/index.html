@@ -14,20 +14,14 @@
                 <div class="sidebar-brand">
                     <p class="eyebrow">Planner</p>
                     <h2>일정 관리</h2>
-                    <p class="sidebar-subtitle">날짜를 선택하고 계획을 입력하며 일정을 정리할 수 있습니다.</p>
+                    <p class="sidebar-subtitle">날짜를 선택하고 계획을 입력해 일정을 정리할 수 있습니다.</p>
                 </div>
 
                 <nav class="sidebar-nav">
                     <a class="sidebar-link active" th:href="@{/dashboard}">일정표</a>
+                    <a class="sidebar-link" th:href="@{/boards}">게시판</a>
                     <a class="sidebar-link" th:href="@{/me}">계정 정보</a>
                 </nav>
-
-                <div class="sidebar-section">
-                    <h3>현재 계정</h3>
-                    <p class="sidebar-subtitle">
-                        <strong th:text="${m.name}"></strong>님  <!-- 컨트롤러가 모델 객체에 데이터를 담아 템플릿에 전달 -->
-                    </p>
-                </div>
 
                 <div class="sidebar-section">
                     <h3>바로가기</h3>
@@ -46,7 +40,7 @@
             <section class="card planner-hero">
                 <p class="eyebrow">Calendar</p>
                 <h1><span th:text="${m.name}">홍길동</span>님의 일정 관리 대시보드</h1>
-                <p class="lead">달력에서 날짜를 선택하고 계획을 입력해 보세요. 선택한 날짜의 일정을 바로 확인할 수 있습니다.</p>
+                <p class="lead">달력에서 날짜를 선택하고 계획을 입력해 보세요. 선택한 날짜의 일정도 바로 확인할 수 있습니다.</p>
 
                 <div class="planner-summary">
                     <div class="summary-chip">
@@ -70,7 +64,7 @@
                         <button id="prevMonthButton" class="icon-button" type="button">이전</button>
                         <div>
                             <h2 id="calendarTitle">2026.3</h2>
-                            <p id="selectedDateText" class="calendar-subtitle">날짜를 선택해 주세요.</p>
+                            <p id="selectedDateText" class="calendar-subtitle">날짜를 선택해 주세요</p>
                         </div>
                         <button id="nextMonthButton" class="icon-button" type="button">다음</button>
                     </div>
@@ -91,7 +85,7 @@
                 <section class="card schedule-card">
                     <div class="panel-head">
                         <h2>계획 입력</h2>
-                        <p>선택한 날짜에 맞는 일정을 추가하고 목록을 확인할 수 있습니다.</p>
+                        <p>선택한 날짜에 맞는 일정을 추가하고 목록에서 확인할 수 있습니다.</p>
                     </div>
 
                     <label for="scheduleInput">계획</label>

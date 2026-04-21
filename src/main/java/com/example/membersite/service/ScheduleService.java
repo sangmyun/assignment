@@ -37,22 +37,14 @@ public class ScheduleService {
 
         List<Schedule> schedules = scheduleRepository
                 .findByMemberIdAndPlanDateBetweenOrderByPlanDateAscIdAsc(member.getId(), startDate, endDate);
-        List<ScheduleResponse> responses = new ArrayList<>();
-        for (Schedule schedule : schedules) {
-            responses.add(ScheduleResponse.from(schedule));
-        }
-        return responses;
+        return toResponses(schedules);
     }
 
     // 반환: 해당 날짜에 속한 일정 응답 목록
     public List<ScheduleResponse> findDailySchedules(String loginId, LocalDate date) {
         Member member = memberService.findByLoginId(loginId);
         List<Schedule> schedules = scheduleRepository.findByMemberIdAndPlanDateOrderByIdAsc(member.getId(), date);
-        List<ScheduleResponse> responses = new ArrayList<>();
-        for (Schedule schedule : schedules) {
-            responses.add(ScheduleResponse.from(schedule));
-        }
-        return responses;
+        return toResponses(schedules);
     }
 
     // 서버에서도 한 번 더 검증한 뒤 일정 내용을 저장한다.
@@ -87,5 +79,13 @@ public class ScheduleService {
         if (request.getContent().trim().length() > 100) {
             throw new IllegalArgumentException("Content must be 100 characters or less.");
         }
+    }
+
+    private List<ScheduleResponse> toResponses(List<Schedule> schedules) {
+        List<ScheduleResponse> responses = new ArrayList<>();
+        for (Schedule schedule : schedules) {
+            responses.add(ScheduleResponse.from(schedule));
+        }
+        return responses;
     }
 }

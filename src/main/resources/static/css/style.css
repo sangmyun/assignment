@@ -103,6 +103,7 @@ a {
 .account-card,
 .calendar-card,
 .schedule-card,
+.board-card,
 .planner-hero,
 .sidebar-card {
     max-width: none;
@@ -707,6 +708,49 @@ input:focus {
     margin: 6px 0 0;
     color: var(--muted);
     font-size: 13px;
+}
+
+.board-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.board-item {
+    display: block;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #ffffff;
+    transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.board-item:hover {
+    transform: translateY(-1px);
+    border-color: var(--line-strong);
+}
+
+.board-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.board-item-head h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.board-content {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #ffffff;
+    white-space: pre-wrap;
+    line-height: 1.7;
 }
 
 .empty-state {

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page page-wide">
+    <div class="planner-shell">
+        <aside class="planner-sidebar">
+            <div class="card sidebar-card">
+                <div class="sidebar-brand">
+                    <p class="eyebrow">게시판</p>
+                    <h2>게시판</h2>
+                    <p class="sidebar-subtitle">게시글을 읽고 작성할 수 있습니다.</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a class="sidebar-link" th:href="@{/dashboard}">일정표</a>
+                    <a class="sidebar-link active" th:href="@{/boards}">게시판</a>
+                    <a class="sidebar-link" th:href="@{/me}">계정 설정</a>
+                </nav>
+
+                <div class="sidebar-section">
+                    <form th:action="@{/logout}" method="post" class="full-form">
+                        <button class="button ghost full-width" type="submit">로그아웃</button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <main class="planner-main">
+            <section class="card board-card">
+                <div class="panel-head">
+                    <p class="eyebrow">게시글</p>
+                    <h1>게시판</h1>
+                </div>
+
+                <div class="alert success" th:if="${message}" th:text="${message}"></div>
+                <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+                <div class="actions">
+                    <a class="button primary" th:href="@{/boards/new}">글쓰기</a>
+                </div>
+
+                <div class="board-list" th:if="${!#lists.isEmpty(posts)}">
+                    <a class="board-item" th:each="post : ${posts}" th:href="@{|/boards/${post.id}|}"> <!--each : -->
+                        <div class="board-item-head">
+                            <h3 th:text="${post.title}">제목</h3>
+                            <span class="hint" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-04-21</span>
+                        </div>
+                        <p class="hint">작성자: <strong th:text="${post.authorName}">이름</strong></p>
+                    </a>
+                </div>
+
+                <div class="empty-state" th:if="${#lists.isEmpty(posts)}">
+                    아직 게시글이 없습니다. 첫 게시글을 작성해보세요.
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

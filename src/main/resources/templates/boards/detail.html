@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${post.title}">게시글 상세</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page page-wide">
+    <div class="planner-shell">
+        <aside class="planner-sidebar">
+            <div class="card sidebar-card">
+                <div class="sidebar-brand">
+                    <p class="eyebrow">게시판</p>
+                    <h2>게시글 상세</h2>
+                </div>
+                <nav class="sidebar-nav">
+                    <a class="sidebar-link" th:href="@{/dashboard}">일정표</a>
+                    <a class="sidebar-link active" th:href="@{/boards}">게시판</a>
+                    <a class="sidebar-link" th:href="@{/me}">계정 설정</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="planner-main">
+            <section class="card board-card">
+                <div class="alert success" th:if="${message}" th:text="${message}"></div>
+                <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+                <p class="eyebrow">게시글</p>
+                <h1 th:text="${post.title}">제목</h1>
+                <p class="hint">
+                    작성자:
+                    <strong th:text="${post.authorName}">이름</strong>
+                    |
+                    작성일:
+                    <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-04-21</span>
+                    |
+                    수정일:
+                    <span th:text="${#temporals.format(post.updatedAt, 'yyyy-MM-dd HH:mm')}">2026-04-21</span>
+                </p>
+
+                <div class="board-content" th:text="${post.content}">
+                    내용
+                </div>
+
+                <div class="actions">
+                    <a class="button secondary" th:href="@{/boards}">목록</a>
+                    <a class="button primary" th:if="${isOwner}" th:href="@{|/boards/${post.id}/edit|}">수정</a>
+                    <form th:if="${isOwner}" th:action="@{|/boards/${post.id}/delete|}" method="post">
+                        <button class="button danger" type="submit">삭제</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,28 +1,21 @@
 package com.example.membersite.support;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import org.springframework.beans.factory.annotation.Value;
+import javax.sql.DataSource;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JdbcConnection {
 
-    private final String url;
-    private final String username;
-    private final String password;
+    private final DataSource dataSource;
 
-    public JdbcConnection(@Value("${app.jdbc.url}") String url,
-                          @Value("${app.jdbc.username}") String username,
-                          @Value("${app.jdbc.password}") String password) {
-        this.url = url;
-        this.username = username;
-        this.password = password;
+    public JdbcConnection(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    // 드라이버를 통해 dbms에 접속
+    // Uses the same DataSource that Spring SQL initialization uses.
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, username, password);
+        return dataSource.getConnection();
     }
 }

@@ -13,3 +13,13 @@ CREATE TABLE IF NOT EXISTS schedules (
     created_at TIMESTAMP NOT NULL,
     CONSTRAINT fk_schedules_member FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS posts (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    member_id BIGINT NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    CONSTRAINT fk_posts_member FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
+);

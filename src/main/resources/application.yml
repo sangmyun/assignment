@@ -1,17 +1,19 @@
 app:
-  jdbc:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/memberdb?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:1234}
   auth:
     jwt:
-      # 반드시 운영 환경에서 환경변수로 변경하세요.
       secret: ${JWT_SECRET:change-this-secret-key-at-least-32chars}
       ttl-seconds: ${JWT_TTL_SECONDS:43200}
       cookie-max-age-seconds: ${JWT_COOKIE_MAX_AGE_SECONDS:43200}
 
-# 아래 설정이 있어서 sql 파일이 실행됨, 템플릿을 매 요청마다 다시 읽음
+
+#매번 DriverManager.getConnection() 호출 -> 요청마다 DB 연결 생성 → 비용 큼 (느림)
+#DataSource 방식: 미리 Connection을 만들어 풀(pool)에 저장 ->필요할 때 꺼내 쓰고 다시 반납
 spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/memberdb?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
       mode: always

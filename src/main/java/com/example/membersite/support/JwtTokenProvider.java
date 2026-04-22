@@ -11,10 +11,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     private final ObjectMapper objectMapper;
@@ -24,9 +26,11 @@ public class JwtTokenProvider {
     @Value("${app.auth.jwt.ttl-seconds:43200}")
     private long ttlSeconds;
 
+    /*
     public JwtTokenProvider(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
+    */
 
 
     //로그인 아이디를 넣어서 JWT 문자열을 만듭니다.
@@ -42,7 +46,7 @@ public class JwtTokenProvider {
         // 바뀔수있는 값들이여서 가변객체
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("sub", loginId);
-        payload.put("iat", now);
+        payload.put("iat", now); // 발급시간
         payload.put("exp", now + ttlSeconds);
 
         try {

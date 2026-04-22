@@ -32,22 +32,16 @@ public class Member {
         this.name = name;
     }
 
-    // 반환: 회원 고유 ID
     public Long getId() {
         return id;
     }
 
-    // 반환: 회원 로그인 ID
-    public String getLoginId() {
-        return loginId;
-    }
+    public String getLoginId() {return loginId;}
 
-    // 반환: 회원 비밀번호 값
     public String getPassword() {
         return password;
     }
 
-    // 반환: 회원 이름
     public String getName() {
         return name;
     }

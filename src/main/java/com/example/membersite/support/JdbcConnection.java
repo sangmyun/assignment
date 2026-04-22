@@ -3,6 +3,8 @@ package com.example.membersite.support;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +15,7 @@ public class JdbcConnection {
     private final String username;
     private final String password;
 
-    public JdbcConnection(@Value("${app.jdbc.url}") String url,
-                          @Value("${app.jdbc.username}") String username,
-                          @Value("${app.jdbc.password}") String password) {
+    public JdbcConnection(@Value("${app.jdbc.url}") String url, @Value("${app.jdbc.username}") String username, @Value("${app.jdbc.password}") String password) {
         this.url = url;
         this.username = username;
         this.password = password;

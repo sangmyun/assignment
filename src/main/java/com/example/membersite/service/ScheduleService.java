@@ -13,19 +13,23 @@ import com.example.membersite.repository.ScheduleRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ScheduleService {
 
     // 일정 서비스는 로그인 사용자와 일정 저장소를 연결해 비즈니스 규칙을 처리한다.
     private final ScheduleRepository scheduleRepository;
     private final MemberService memberService;
 
+    /*
     public ScheduleService(ScheduleRepository scheduleRepository, MemberService memberService) {
         this.scheduleRepository = scheduleRepository;
         this.memberService = memberService;
     }
+    */
 
     // 월 단위 조회를 위해 시작일과 마지막 날짜를 계산한다.
     // 누구의 일정인지 몇 년 몇 월 일정인지를 받아서 그 달 일정 목록을 돌려주는 함수

@@ -3,10 +3,12 @@ package com.example.membersite.support;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class AuthTokenManager {
 
     private static final String AUTH_COOKIE_NAME = "memberAuthToken";
@@ -15,14 +17,17 @@ public class AuthTokenManager {
     @Value("${app.auth.jwt.cookie-max-age-seconds:43200}")
     private int cookieMaxAgeSeconds;
 
+    /*
     public AuthTokenManager(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
+    */
 
     public void createToken(String loginId, HttpServletResponse response) {
         String token = jwtTokenProvider.createToken(loginId);
         response.addCookie(createCookie(AUTH_COOKIE_NAME, token, cookieMaxAgeSeconds));
     }
+
 
     public String getLoginId(HttpServletRequest request) {
         Cookie cookie = findCookie(request, AUTH_COOKIE_NAME);
@@ -54,7 +59,7 @@ public class AuthTokenManager {
 
     private Cookie createCookie(String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/");
+        cookie.setPath("/"); //
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAge);
         return cookie;

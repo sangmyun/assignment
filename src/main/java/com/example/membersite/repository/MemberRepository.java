@@ -6,50 +6,61 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class MemberRepository {
 
     private static final String INSERT_MEMBER_SQL =
             "insert into members (login_id, password, name) values (?, ?, ?)";
+
     private static final String COUNT_BY_LOGIN_ID_SQL =
             "select count(*) from members where login_id = ?";
+
     private static final String FIND_BY_LOGIN_ID_SQL =
             "select id, login_id, password, name from members where login_id = ?";
+
     private static final String UPDATE_NAME_SQL =
             "update members set name = ? where id = ?";
+
     private static final String UPDATE_PASSWORD_SQL =
             "update members set password = ? where id = ?";
 
     private final JdbcConnection connection;
 
+    /*
     public MemberRepository(JdbcConnection connection) {
         this.connection = connection;
     }
+    */
 
     public Member save(Member member) {
         try (Connection dbConnection = connection.getConnection();
              PreparedStatement statement = dbConnection.prepareStatement(
                      INSERT_MEMBER_SQL,
-                     PreparedStatement.RETURN_GENERATED_KEYS
+                     PreparedStatement.RETURN_GENERATED_KEYS // 생성된 키 반환
              )) {
-            bindMemberValues(statement, member);
+            statement.setString(1, member.getLoginId());
+            statement.setString(2, member.getPassword());
+            statement.setString(3, member.getName());
             statement.executeUpdate();
 
+
+            Long createdMemberId;
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (!generatedKeys.next()) {
                     throw new IllegalStateException("Failed to create member.");
                 }
-
-                Long createdMemberId = generatedKeys.getLong(1);
-                return new Member(
-                        createdMemberId,
-                        member.getLoginId(),
-                        member.getPassword(),
-                        member.getName()
-                );
+                createdMemberId = generatedKeys.getLong(1);
             }
+            return new Member(
+                    createdMemberId,
+                    member.getLoginId(),
+                    member.getPassword(),
+                    member.getName()
+            );
         } catch (SQLException exception) {
             throw new IllegalStateException("Failed to save member.", exception);
         }
@@ -111,13 +122,6 @@ public class MemberRepository {
             throw new IllegalStateException("Failed to update member.", exception);
         }
     }
-
-    private void bindMemberValues(PreparedStatement statement, Member member) throws SQLException {
-        statement.setString(1, member.getLoginId());
-        statement.setString(2, member.getPassword());
-        statement.setString(3, member.getName());
-    }
-
     private Member mapMember(ResultSet resultSet) throws SQLException {
         return new Member(
                 resultSet.getLong("id"),

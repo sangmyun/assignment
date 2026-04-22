@@ -9,9 +9,11 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class ScheduleRepository {
 
     private static final String FIND_BY_MEMBER_ID_AND_PLAN_DATE_BETWEEN_SQL = """
@@ -38,9 +40,11 @@ public class ScheduleRepository {
 
     private final JdbcConnection connection;
 
+    /*
     public ScheduleRepository(JdbcConnection connection) {
         this.connection = connection;
     }
+    */
 
     public List<Schedule> findByMemberIdAndPlanDateBetweenOrderByPlanDateAscIdAsc(
             Long memberId,
@@ -68,27 +72,18 @@ public class ScheduleRepository {
 
     public Schedule save(Schedule schedule) {
         try (Connection dbConnection = connection.getConnection();
-             PreparedStatement statement = dbConnection.prepareStatement(
-                     INSERT_SCHEDULE_SQL,
-                     PreparedStatement.RETURN_GENERATED_KEYS
-             )) {
+             PreparedStatement statement = createInsertStatement(dbConnection)) {
             bindScheduleValues(statement, schedule);
             statement.executeUpdate();
 
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (!generatedKeys.next()) {
-                    throw new IllegalStateException("Failed to create schedule.");
-                }
-
-                Long createdScheduleId = generatedKeys.getLong(1);
-                return new Schedule(
-                        createdScheduleId,
-                        schedule.getMemberId(),
-                        schedule.getPlanDate(),
-                        schedule.getContent(),
-                        schedule.getCreatedAt()
-                );
-            }
+            Long createdScheduleId = extractGeneratedScheduleId(statement);
+            return new Schedule(
+                    createdScheduleId,
+                    schedule.getMemberId(),
+                    schedule.getPlanDate(),
+                    schedule.getContent(),
+                    schedule.getCreatedAt()
+            );
         } catch (SQLException exception) {
             throw new IllegalStateException("Failed to save schedule.", exception);
         }
@@ -99,14 +94,7 @@ public class ScheduleRepository {
              PreparedStatement statement = dbConnection.prepareStatement(FIND_BY_ID_AND_MEMBER_ID_SQL)) {
             statement.setLong(1, scheduleId);
             statement.setLong(2, memberId);
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (!resultSet.next()) {
-                    return null;
-                }
-
-                return mapSchedule(resultSet);
-            }
+            return fetchSingleSchedule(statement);
         } catch (SQLException exception) {
             throw new IllegalStateException("Failed to find schedule.", exception);
         }
@@ -120,13 +108,7 @@ public class ScheduleRepository {
         try (Connection dbConnection = connection.getConnection();
              PreparedStatement statement = dbConnection.prepareStatement(sql)) {
             statementSetter.setValues(statement);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<Schedule> schedules = new ArrayList<>();
-                while (resultSet.next()) {
-                    schedules.add(mapSchedule(resultSet));
-                }
-                return schedules;
-            }
+            return fetchSchedules(statement);
         } catch (SQLException exception) {
             throw new IllegalStateException("Failed to query schedules.", exception);
         }
@@ -147,6 +129,39 @@ public class ScheduleRepository {
         statement.setObject(2, schedule.getPlanDate());
         statement.setString(3, schedule.getContent());
         statement.setObject(4, schedule.getCreatedAt());
+    }
+
+    private PreparedStatement createInsertStatement(Connection dbConnection) throws SQLException {
+        return dbConnection.prepareStatement(INSERT_SCHEDULE_SQL, PreparedStatement.RETURN_GENERATED_KEYS);
+    }
+
+    private Long extractGeneratedScheduleId(PreparedStatement statement) throws SQLException {
+        try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+            if (!generatedKeys.next()) {
+                throw new IllegalStateException("Failed to create schedule.");
+            }
+            return generatedKeys.getLong(1);
+        }
+    }
+
+    private Schedule fetchSingleSchedule(PreparedStatement statement) throws SQLException {
+        try (ResultSet resultSet = statement.executeQuery()) {
+            if (!resultSet.next()) {
+                return null;
+            }
+
+            return mapSchedule(resultSet);
+        }
+    }
+
+    private List<Schedule> fetchSchedules(PreparedStatement statement) throws SQLException {
+        try (ResultSet resultSet = statement.executeQuery()) {
+            List<Schedule> schedules = new ArrayList<>();
+            while (resultSet.next()) {
+                schedules.add(mapSchedule(resultSet));
+            }
+            return schedules;
+        }
     }
 
     private Schedule mapSchedule(ResultSet resultSet) throws SQLException {

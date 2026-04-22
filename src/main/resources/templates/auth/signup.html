@@ -16,27 +16,19 @@
         <form th:action="@{/signup}" method="post">
             <label for="loginId">아이디</label>
             <input id="loginId" name="loginId" th:value="${signupForm.loginId}" type="text" placeholder="4~20자">
-            <p class="field-error"
-               th:if="${#fields.hasErrors('signupForm.loginId')}"
-               th:text="${#fields.errors('signupForm.loginId')[0]}"></p>
+            <p class="field-error" th:if="${loginIdError}" th:text="${loginIdError}"></p>
 
             <label for="password">비밀번호</label>
             <input id="password" name="password" th:value="${signupForm.password}" type="password" placeholder="비밀번호 입력">
-            <p class="field-error"
-               th:if="${#fields.hasErrors('signupForm.password')}"
-               th:text="${#fields.errors('signupForm.password')[0]}"></p>
+            <p class="field-error" th:if="${passwordError}" th:text="${passwordError}"></p>
 
             <label for="passwordConfirm">비밀번호 확인</label>
             <input id="passwordConfirm" name="passwordConfirm" th:value="${signupForm.passwordConfirm}" type="password" placeholder="비밀번호 다시 입력">
-            <p class="field-error"
-               th:if="${#fields.hasErrors('signupForm.passwordConfirm')}"
-               th:text="${#fields.errors('signupForm.passwordConfirm')[0]}"></p>
+            <p class="field-error" th:if="${passwordConfirmError}" th:text="${passwordConfirmError}"></p>
 
             <label for="name">이름</label>
             <input id="name" name="name" th:value="${signupForm.name}" type="text" placeholder="이름 입력">
-            <p class="field-error"
-               th:if="${#fields.hasErrors('signupForm.name')}"
-               th:text="${#fields.errors('signupForm.name')[0]}"></p>
+            <p class="field-error" th:if="${nameError}" th:text="${nameError}"></p>
 
             <button class="button primary full" type="submit">계정 만들기</button>
         </form>

@@ -26,27 +26,23 @@ public class JwtTokenProvider {
     @Value("${app.auth.jwt.ttl-seconds:43200}")
     private long ttlSeconds;
 
-    /*
-    public JwtTokenProvider(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-    */
-
-
-    //로그인 아이디를 넣어서 JWT 문자열을 만듭니다.
+    /**
+     * Creates a signed JWT for the given login id.
+     *
+     * @param loginId login id
+     * @return compact JWT string
+     */
     public String createToken(String loginId) {
-        long now = Instant.now().getEpochSecond(); // Instant.now() 현재 시각가져오기 ex)  2026-04-20T12:34:56Z , getEpochSecond() 초단위로 바꿈 1713600000
+        long now = Instant.now().getEpochSecond();
 
-        // “키-값 쌍을 담는 Map 객체를 만들고, 거기에 내용을 추가, 고정 값이라서 불변객체
         Map<String, Object> header = Map.of(
                 "alg", "HS256",
                 "typ", "JWT"
         );
 
-        // 바뀔수있는 값들이여서 가변객체
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("sub", loginId);
-        payload.put("iat", now); // 발급시간
+        payload.put("iat", now);
         payload.put("exp", now + ttlSeconds);
 
         try {
@@ -60,7 +56,12 @@ public class JwtTokenProvider {
         }
     }
 
-    //토큰이 유효하면 안에 들어있는 loginId를 꺼냅니다.
+    /**
+     * Validates token and extracts login id.
+     *
+     * @param token JWT string
+     * @return login id or null when token is invalid
+     */
     public String getLoginId(String token) {
         try {
             Map<String, Object> payload = parseAndValidate(token);
@@ -74,7 +75,13 @@ public class JwtTokenProvider {
         }
     }
 
-    /**토큰을 구조 검사 → 서명 검증 → 만료(exp) 검증 순서로 확인해 모두 통과하면 payload를 반환**/
+    /**
+     * Parses token and validates structure, signature, and expiration.
+     *
+     * @param token JWT string
+     * @return payload map
+     * @throws Exception when token is invalid
+     */
     private Map<String, Object> parseAndValidate(String token) throws Exception {
         String[] parts = token.split("\\.");
         if (parts.length != 3) {
@@ -106,16 +113,25 @@ public class JwtTokenProvider {
         return payload;
     }
 
-
-    /** Map → JSON → Base64(URL-safe, padding 없음) 문자열로 변환**/
-    // 데이터를 안전하게 전달하기해 base64 사용
+    /**
+     * Encodes a map as base64url JSON without padding.
+     *
+     * @param value map to encode
+     * @return encoded string
+     * @throws Exception when serialization fails
+     */
     private String encodeJson(Map<String, Object> value) throws Exception {
         byte[] jsonBytes = objectMapper.writeValueAsBytes(value);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes);
     }
 
-    /**header.payload를 secret으로 HmacSHA256 서명후 base64인코딩**/
-    // 서명 값을 만들때 입력값을 바이트로 변환해야함, 알고리즘이 바이트 단위로 작동해서
+    /**
+     * Computes HMAC-SHA256 signature for JWT signing input.
+     *
+     * @param signingInput token header.payload
+     * @return base64url signature
+     * @throws GeneralSecurityException when crypto operation fails
+     */
     private String sign(String signingInput) throws GeneralSecurityException {
         if (secret == null || secret.isBlank()) {
             throw new IllegalStateException("app.auth.jwt.secret must not be blank");

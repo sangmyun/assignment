@@ -22,6 +22,13 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    /**
+     * Renders the account page.
+     *
+     * @param request servlet request
+     * @param model view model
+     * @return account view name
+     */
     @GetMapping("/me")
     public String profile(HttpServletRequest request, Model model) {
         String loginId = getLoginId(request);
@@ -30,6 +37,13 @@ public class MemberController {
         return "member/account";
     }
 
+    /**
+     * Renders the name edit page prefilled with the current name.
+     *
+     * @param request servlet request
+     * @param model view model
+     * @return edit-name view name
+     */
     @GetMapping("/me/name")
     public String editNameForm(HttpServletRequest request, Model model) {
         String loginId = getLoginId(request);
@@ -41,6 +55,15 @@ public class MemberController {
         return "member/edit-name";
     }
 
+    /**
+     * Updates the member name after validation.
+     *
+     * @param request servlet request
+     * @param updateNameForm submitted name form
+     * @param bindingResult validation result
+     * @param redirectAttributes redirect attributes
+     * @return edit-name view on error, otherwise profile redirect
+     */
     @PostMapping("/me/name")
     public String editName(HttpServletRequest request,
                            @Valid @ModelAttribute UpdateNameForm updateNameForm,
@@ -56,12 +79,27 @@ public class MemberController {
         return "redirect:/me";
     }
 
+    /**
+     * Renders the password edit page.
+     *
+     * @param model view model
+     * @return edit-password view name
+     */
     @GetMapping("/me/password")
     public String editPasswordForm(Model model) {
         model.addAttribute("updatePasswordForm", new UpdatePasswordForm());
         return "member/edit-password";
     }
 
+    /**
+     * Updates the password after matching and current-password checks.
+     *
+     * @param request servlet request
+     * @param updatePasswordForm submitted password form
+     * @param bindingResult validation result
+     * @param redirectAttributes redirect attributes
+     * @return edit-password view on error, otherwise profile redirect
+     */
     @PostMapping("/me/password")
     public String editPassword(HttpServletRequest request,
                                @Valid @ModelAttribute UpdatePasswordForm updatePasswordForm,
@@ -89,6 +127,12 @@ public class MemberController {
         return "redirect:/me";
     }
 
+    /**
+     * Reads login id attached by the login-check interceptor.
+     *
+     * @param request servlet request
+     * @return authenticated login id
+     */
     private String getLoginId(HttpServletRequest request) {
         return (String) request.getAttribute(LoginCheckInterceptor.LOGIN_ID_ATTRIBUTE);
     }

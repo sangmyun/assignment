@@ -13,6 +13,15 @@ public class GuestOnlyInterceptor implements HandlerInterceptor {
 
     private final AuthTokenManager authTokenManager;
 
+    /**
+     * Blocks guest-only pages for already authenticated users.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @param handler handler object
+     * @return true to continue, false to stop after redirect
+     * @throws Exception from response handling
+     */
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,

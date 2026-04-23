@@ -14,14 +14,11 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /*
-    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-    */
-
-    // Save password as hash, never as plain text.
+    /**
+     * Registers a new member with a hashed password.
+     *
+     * @param signupForm sign-up input
+     */
     public void register(SignupForm signupForm) {
         String hashedPassword = passwordEncoder.encode(signupForm.getPassword());
         Member member = new Member(
@@ -32,11 +29,24 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    /**
+     * Checks whether a login id is already taken.
+     *
+     * @param loginId login id
+     * @return true when duplicated
+     */
     public boolean isDuplicatedLoginId(String loginId) {
         return memberRepository.existsByLoginId(loginId);
     }
 
-    public Member  findByLoginId(String loginId) {
+    /**
+     * Finds a member by login id.
+     *
+     * @param loginId login id
+     * @return member entity
+     * @throws IllegalArgumentException when member is not found
+     */
+    public Member findByLoginId(String loginId) {
         Member member = memberRepository.findByLoginId(loginId);
         if (member == null) {
             throw new IllegalArgumentException("Member not found.");
@@ -45,30 +55,53 @@ public class MemberService {
         return member;
     }
 
+    /**
+     * Authenticates a login id and password.
+     *
+     * @param loginId login id
+     * @param password raw password
+     * @return true when authentication succeeds
+     */
     public boolean authenticate(String loginId, String password) {
         Member member = memberRepository.findByLoginId(loginId);
         if (member == null) {
             return false;
         }
 
-        /* return password.equals(member.getPassword());*/
         return passwordEncoder.matches(password, member.getPassword());
     }
 
+    /**
+     * Updates member display name.
+     *
+     * @param loginId login id
+     * @param name new name
+     */
     public void updateName(String loginId, String name) {
         Member member = findByLoginId(loginId);
         memberRepository.updateName(member.getId(), name);
     }
 
+    /**
+     * Checks whether raw password matches the stored hash.
+     *
+     * @param loginId login id
+     * @param rawPassword raw password
+     * @return true when password matches
+     */
     public boolean matchesPassword(String loginId, String rawPassword) {
         Member member = findByLoginId(loginId);
-        /* return rawPassword.equals(member.getPassword());*/
         return passwordEncoder.matches(rawPassword, member.getPassword());
     }
 
+    /**
+     * Updates member password after hashing.
+     *
+     * @param loginId login id
+     * @param newPassword new raw password
+     */
     public void updatePassword(String loginId, String newPassword) {
         Member member = findByLoginId(loginId);
-        /* memberRepository.updatePassword(member.getId(), newPassword);*/
         String hashedPassword = passwordEncoder.encode(newPassword);
         memberRepository.updatePassword(member.getId(), hashedPassword);
     }

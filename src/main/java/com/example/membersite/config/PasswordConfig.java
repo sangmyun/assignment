@@ -8,6 +8,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class PasswordConfig {
 
+    /**
+     * Registers the password encoder bean used by the service layer.
+     *
+     * @return bcrypt password encoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

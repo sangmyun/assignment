@@ -1,13 +1,7 @@
 package com.example.membersite.repository;
 
 import com.example.membersite.entity.Schedule;
-import com.example.membersite.support.JdbcConnection;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -16,166 +10,78 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ScheduleRepository {
 
-    private static final String FIND_BY_MEMBER_ID_AND_PLAN_DATE_BETWEEN_SQL = """
-            select id, member_id, plan_date, content, created_at
-            from schedules
-            where member_id = ? and plan_date between ? and ?
-            order by plan_date asc, id asc
-            """;
-    private static final String FIND_BY_MEMBER_ID_AND_PLAN_DATE_SQL = """
-            select id, member_id, plan_date, content, created_at
-            from schedules
-            where member_id = ? and plan_date = ?
-            order by id asc
-            """;
-    private static final String INSERT_SCHEDULE_SQL =
-            "insert into schedules (member_id, plan_date, content, created_at) values (?, ?, ?, ?)";
-    private static final String FIND_BY_ID_AND_MEMBER_ID_SQL = """
-            select id, member_id, plan_date, content, created_at
-            from schedules
-            where id = ? and member_id = ?
-            """;
-    private static final String DELETE_BY_ID_SQL =
-            "delete from schedules where id = ?";
+    private final ScheduleMapper scheduleMapper;
 
-    private final JdbcConnection connection;
-
-    /*
-    public ScheduleRepository(JdbcConnection connection) {
-        this.connection = connection;
-    }
-    */
-
+    /**
+     * Finds schedules between dates for a member.
+     *
+     * @param memberId member id
+     * @param startDate start date
+     * @param endDate end date
+     * @return ordered schedules
+     */
     public List<Schedule> findByMemberIdAndPlanDateBetweenOrderByPlanDateAscIdAsc(
             Long memberId,
             LocalDate startDate,
             LocalDate endDate) {
-        return querySchedules(
-                FIND_BY_MEMBER_ID_AND_PLAN_DATE_BETWEEN_SQL,
-                statement -> {
-                    statement.setLong(1, memberId);
-                    statement.setObject(2, startDate);
-                    statement.setObject(3, endDate);
-                }
-        );
+        return scheduleMapper.findByMemberIdAndPlanDateBetweenOrderByPlanDateAscIdAsc(memberId, startDate, endDate);
     }
 
+    /**
+     * Finds schedules of a specific date for a member.
+     *
+     * @param memberId member id
+     * @param planDate plan date
+     * @return ordered schedules
+     */
     public List<Schedule> findByMemberIdAndPlanDateOrderByIdAsc(Long memberId, LocalDate planDate) {
-        return querySchedules(
-                FIND_BY_MEMBER_ID_AND_PLAN_DATE_SQL,
-                statement -> {
-                    statement.setLong(1, memberId);
-                    statement.setObject(2, planDate);
-                }
-        );
+        return scheduleMapper.findByMemberIdAndPlanDateOrderByIdAsc(memberId, planDate);
     }
 
+    /**
+     * Inserts a schedule row and returns the saved entity with generated id.
+     *
+     * @param schedule schedule entity
+     * @return saved schedule with id
+     */
     public Schedule save(Schedule schedule) {
-        try (Connection dbConnection = connection.getConnection();
-             PreparedStatement statement = createInsertStatement(dbConnection)) {
-            bindScheduleValues(statement, schedule);
-            statement.executeUpdate();
-
-            Long createdScheduleId = extractGeneratedScheduleId(statement);
-            return new Schedule(
-                    createdScheduleId,
-                    schedule.getMemberId(),
-                    schedule.getPlanDate(),
-                    schedule.getContent(),
-                    schedule.getCreatedAt()
-            );
-        } catch (SQLException exception) {
-            throw new IllegalStateException("Failed to save schedule.", exception);
+        ScheduleMapper.ScheduleInsertParam param = new ScheduleMapper.ScheduleInsertParam(
+                schedule.getMemberId(),
+                schedule.getPlanDate(),
+                schedule.getContent(),
+                schedule.getCreatedAt()
+        );
+        int affectedRows = scheduleMapper.insert(param);
+        if (affectedRows != 1 || param.getId() == null) {
+            throw new IllegalStateException("Failed to create schedule.");
         }
-    }
 
-    public Schedule findByIdAndMemberId(Long scheduleId, Long memberId) {
-        try (Connection dbConnection = connection.getConnection();
-             PreparedStatement statement = dbConnection.prepareStatement(FIND_BY_ID_AND_MEMBER_ID_SQL)) {
-            statement.setLong(1, scheduleId);
-            statement.setLong(2, memberId);
-            return fetchSingleSchedule(statement);
-        } catch (SQLException exception) {
-            throw new IllegalStateException("Failed to find schedule.", exception);
-        }
-    }
-
-    public void deleteById(Long scheduleId) {
-        executeUpdate(DELETE_BY_ID_SQL, statement -> statement.setLong(1, scheduleId));
-    }
-
-    private List<Schedule> querySchedules(String sql, StatementSetter statementSetter) {
-        try (Connection dbConnection = connection.getConnection();
-             PreparedStatement statement = dbConnection.prepareStatement(sql)) {
-            statementSetter.setValues(statement);
-            return fetchSchedules(statement);
-        } catch (SQLException exception) {
-            throw new IllegalStateException("Failed to query schedules.", exception);
-        }
-    }
-
-    private void executeUpdate(String sql, StatementSetter statementSetter) {
-        try (Connection dbConnection = connection.getConnection();
-             PreparedStatement statement = dbConnection.prepareStatement(sql)) {
-            statementSetter.setValues(statement);
-            statement.executeUpdate();
-        } catch (SQLException exception) {
-            throw new IllegalStateException("Failed to update schedule.", exception);
-        }
-    }
-
-    private void bindScheduleValues(PreparedStatement statement, Schedule schedule) throws SQLException {
-        statement.setLong(1, schedule.getMemberId());
-        statement.setObject(2, schedule.getPlanDate());
-        statement.setString(3, schedule.getContent());
-        statement.setObject(4, schedule.getCreatedAt());
-    }
-
-    private PreparedStatement createInsertStatement(Connection dbConnection) throws SQLException {
-        return dbConnection.prepareStatement(INSERT_SCHEDULE_SQL, PreparedStatement.RETURN_GENERATED_KEYS);
-    }
-
-    private Long extractGeneratedScheduleId(PreparedStatement statement) throws SQLException {
-        try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-            if (!generatedKeys.next()) {
-                throw new IllegalStateException("Failed to create schedule.");
-            }
-            return generatedKeys.getLong(1);
-        }
-    }
-
-    private Schedule fetchSingleSchedule(PreparedStatement statement) throws SQLException {
-        try (ResultSet resultSet = statement.executeQuery()) {
-            if (!resultSet.next()) {
-                return null;
-            }
-
-            return mapSchedule(resultSet);
-        }
-    }
-
-    private List<Schedule> fetchSchedules(PreparedStatement statement) throws SQLException {
-        try (ResultSet resultSet = statement.executeQuery()) {
-            List<Schedule> schedules = new ArrayList<>();
-            while (resultSet.next()) {
-                schedules.add(mapSchedule(resultSet));
-            }
-            return schedules;
-        }
-    }
-
-    private Schedule mapSchedule(ResultSet resultSet) throws SQLException {
         return new Schedule(
-                resultSet.getLong("id"),
-                resultSet.getLong("member_id"),
-                resultSet.getDate("plan_date").toLocalDate(),
-                resultSet.getString("content"),
-                resultSet.getTimestamp("created_at").toLocalDateTime()
+                param.getId(),
+                schedule.getMemberId(),
+                schedule.getPlanDate(),
+                schedule.getContent(),
+                schedule.getCreatedAt()
         );
     }
 
-    @FunctionalInterface
-    private interface StatementSetter {
-        void setValues(PreparedStatement statement) throws SQLException;
+    /**
+     * Finds a schedule by schedule id and owner member id.
+     *
+     * @param scheduleId schedule id
+     * @param memberId member id
+     * @return schedule entity or null when not found
+     */
+    public Schedule findByIdAndMemberId(Long scheduleId, Long memberId) {
+        return scheduleMapper.findByIdAndMemberId(scheduleId, memberId);
+    }
+
+    /**
+     * Deletes a schedule row by id.
+     *
+     * @param scheduleId schedule id
+     */
+    public void deleteById(Long scheduleId) {
+        scheduleMapper.deleteById(scheduleId);
     }
 }

@@ -24,51 +24,46 @@ public class ScheduleApiController {
 
     private final ScheduleService scheduleService;
 
-    /*
-    public ScheduleApiController(ScheduleService scheduleService) {
-        this.scheduleService = scheduleService;
-    }
-    */
-
+    /**
+     * Returns schedules for a specific month.
+     *
+     * @param request servlet request
+     * @param year target year
+     * @param month target month
+     * @return monthly schedule list
+     */
     @GetMapping
     public List<ScheduleResponse> monthlySchedules(HttpServletRequest request,
                                                    @RequestParam int year,
                                                    @RequestParam int month) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-         * }
-         */
         String loginId = getLoginId(request);
         return scheduleService.findMonthlySchedules(loginId, year, month);
     }
 
+    /**
+     * Returns schedules for a specific day.
+     *
+     * @param request servlet request
+     * @param date target date
+     * @return daily schedule list
+     */
     @GetMapping("/daily")
     public List<ScheduleResponse> dailySchedules(HttpServletRequest request,
                                                  @RequestParam LocalDate date) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-         * }
-         */
         String loginId = getLoginId(request);
         return scheduleService.findDailySchedules(loginId, date);
     }
 
+    /**
+     * Creates a schedule.
+     *
+     * @param request servlet request
+     * @param scheduleCreateRequest create payload
+     * @return 200 with created schedule or 400 with validation message
+     */
     @PostMapping
     public ResponseEntity<?> create(HttpServletRequest request,
                                     @RequestBody ScheduleCreateRequest scheduleCreateRequest) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-         * }
-         */
         String loginId = getLoginId(request);
 
         try {
@@ -78,16 +73,16 @@ public class ScheduleApiController {
         }
     }
 
+    /**
+     * Deletes a schedule by id.
+     *
+     * @param request servlet request
+     * @param scheduleId schedule id
+     * @return 200 on success or 404 when not found
+     */
     @PostMapping("/{scheduleId}/delete")
     public ResponseEntity<?> delete(HttpServletRequest request,
                                     @PathVariable Long scheduleId) {
-        /*
-         * previous way
-         * String loginId = sessionManager.getLoginId(request);
-         * if (loginId == null) {
-         *     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-         * }
-         */
         String loginId = getLoginId(request);
 
         try {
@@ -98,6 +93,12 @@ public class ScheduleApiController {
         }
     }
 
+    /**
+     * Reads login id attached by the login-check interceptor.
+     *
+     * @param request servlet request
+     * @return authenticated login id
+     */
     private String getLoginId(HttpServletRequest request) {
         return (String) request.getAttribute(LoginCheckInterceptor.LOGIN_ID_ATTRIBUTE);
     }

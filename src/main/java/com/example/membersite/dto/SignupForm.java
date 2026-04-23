@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 
 public class SignupForm {
 
-    // 검증 애너테이션은 컨트롤러의 @Valid와 함께 동작한다.
     @NotBlank(message = "로그인 아이디를 입력하세요.")
     @Size(min = 4, max = 20, message = "로그인 아이디는 4자 이상 20자 이하로 입력하세요.")
     private String loginId;
@@ -21,44 +20,83 @@ public class SignupForm {
     @Size(max = 30, message = "이름은 30자 이하로 입력하세요.")
     private String name;
 
-    // 두 비밀번호 입력값이 같은지 확인하는 보조 메서드다.
-    // 반환: 비밀번호와 비밀번호 확인 값이 같으면 true, 아니면 false
+    /**
+     * Checks whether password and password-confirm match.
+     *
+     * @return true when two password inputs are equal
+     */
     public boolean passwordMatches() {
         return password != null && password.equals(passwordConfirm);
     }
 
-    // 반환: 입력된 로그인 ID 값
+    /**
+     * Returns login id.
+     *
+     * @return login id
+     */
     public String getLoginId() {
         return loginId;
     }
 
+    /**
+     * Sets login id.
+     *
+     * @param loginId login id
+     */
     public void setLoginId(String loginId) {
         this.loginId = loginId;
     }
 
-    // 반환: 입력된 비밀번호 값
+    /**
+     * Returns password.
+     *
+     * @return password
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Sets password.
+     *
+     * @param password password
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
-    // 반환: 입력된 비밀번호 확인 값
+    /**
+     * Returns password confirmation.
+     *
+     * @return password confirmation
+     */
     public String getPasswordConfirm() {
         return passwordConfirm;
     }
 
+    /**
+     * Sets password confirmation.
+     *
+     * @param passwordConfirm password confirmation
+     */
     public void setPasswordConfirm(String passwordConfirm) {
         this.passwordConfirm = passwordConfirm;
     }
 
-    // 반환: 입력된 회원 이름 값
+    /**
+     * Returns display name.
+     *
+     * @return member name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets display name.
+     *
+     * @param name member name
+     */
     public void setName(String name) {
         this.name = name;
     }

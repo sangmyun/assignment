@@ -19,13 +19,25 @@ public class AuthController {
     private final MemberService memberService;
     private final AuthTokenManager authTokenManager;
 
-    // model은 컨트롤러가 템플릿에 넘겨주는 데이터, 템플릿에서 ${signupForm}으로 꺼내씀
+    /**
+     * Renders the sign-up page with an empty form model.
+     *
+     * @param model view model
+     * @return sign-up view name
+     */
     @GetMapping("/signup")
     public String signupForm(Model model) {
         model.addAttribute("signupForm", new SignupForm());
         return "auth/signup";
     }
 
+    /**
+     * Validates and processes sign-up input.
+     *
+     * @param signupForm submitted sign-up form
+     * @param model view model
+     * @return sign-up view on validation error, otherwise login redirect
+     */
     @PostMapping("/signup")
     public String signup(@ModelAttribute SignupForm signupForm, Model model) {
         boolean hasError = false;
@@ -75,11 +87,24 @@ public class AuthController {
         return "redirect:/login?registered";
     }
 
+    /**
+     * Renders the login page.
+     *
+     * @return login view name
+     */
     @GetMapping("/login")
     public String login() {
         return "auth/login";
     }
 
+    /**
+     * Authenticates user credentials and issues an auth token cookie.
+     *
+     * @param loginId login id
+     * @param password raw password
+     * @param response servlet response
+     * @return dashboard redirect on success, login redirect with error on failure
+     */
     @PostMapping("/login")
     public String login(@RequestParam String loginId,
                         @RequestParam String password,
@@ -92,6 +117,12 @@ public class AuthController {
         return "redirect:/dashboard";
     }
 
+    /**
+     * Expires the auth token cookie.
+     *
+     * @param response servlet response
+     * @return login redirect with logout flag
+     */
     @PostMapping("/logout")
     public String logout(HttpServletResponse response) {
         authTokenManager.expire(response);

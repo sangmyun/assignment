@@ -1,18 +1,23 @@
 app:
-  jdbc:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/memberdb?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:1234}
   auth:
     jwt:
-      # 반드시 운영 환경에서 환경변수로 변경하세요.
       secret: ${JWT_SECRET:change-this-secret-key-at-least-32chars}
       ttl-seconds: ${JWT_TTL_SECONDS:43200}
       cookie-max-age-seconds: ${JWT_COOKIE_MAX_AGE_SECONDS:43200}
 
-# 아래 설정이 있어서 sql 파일이 실행됨, 템플릿을 매 요청마다 다시 읽음
 spring:
-  sql:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/memberdb?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
+    hikari:
+      pool-name: MemberSiteHikariPool #커넥션 풀 이름
+      maximum-pool-size: ${DB_MAX_POOL_SIZE:10} #최대 커넥션 풀 수
+      minimum-idle: ${DB_MIN_IDLE:5} # 최소 이 개수만큼 유지
+      connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:30000} # 커넥션 풀을 빌리기 위해 기다리는 최대 시간
+      idle-timeout: ${DB_IDLE_TIMEOUT_MS:600000} # 사용되지 않고 놀고있는 커넥션 정리
+      max-lifetime: ${DB_MAX_LIFETIME_MS:1800000} # 커넥션의 최대 수명
+
     init:
       mode: always
   thymeleaf:

@@ -8,39 +8,32 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-// 검사 로직 실행
 @Component
 @RequiredArgsConstructor
 public class LoginCheckInterceptor implements HandlerInterceptor {
 
-    // Interceptor puts loginId here so controllers can reuse it.
     public static final String LOGIN_ID_ATTRIBUTE = "loginId";
 
-    // private final SessionManager sessionManager;
     private final AuthTokenManager authTokenManager;
 
-    /*
-    public LoginCheckInterceptor(AuthTokenManager authTokenManager) {
-        this.authTokenManager = authTokenManager;
-    }
-    */
-
-
-    // true: DispatcherServlet이 컨트롤러로 진행
-    // false: DispatcherServlet이 처리 중단 (컨트롤러 미호출)
+    /**
+     * Validates authentication for protected routes and stores login id in request.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @param handler handler object
+     * @return true to continue, false to stop the request
+     * @throws Exception from response handling
+     */
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
-        /*
-        String loginId = sessionManager.getLoginId(request);
-        */
         String loginId = authTokenManager.getLoginId(request);
         if (loginId != null) {
             request.setAttribute(LOGIN_ID_ATTRIBUTE, loginId);
             return true;
         }
-
 
         if (request.getRequestURI().startsWith("/api/")) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());

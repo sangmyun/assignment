@@ -94,8 +94,8 @@
     function renderCalendar() {
         const firstDay = new Date(currentYear, currentMonth - 1, 1);
         const lastDay = new Date(currentYear, currentMonth, 0);
-        const startWeekday = firstDay.getDay();
-        const totalDays = lastDay.getDate();
+        const startWeekday = firstDay.getDay(); // 해당 월 1일 무슨요일인지 숫자로 나타낸 값 ex) 0: 일요일, 1: 월요일, 2: 화요일 ~~~~
+        const totalDays = lastDay.getDate(); //해당 월의 총 일수
 
         calendarTitle.textContent = currentYear + "년 " + currentMonth + "월";
         calendarGrid.innerHTML = "";

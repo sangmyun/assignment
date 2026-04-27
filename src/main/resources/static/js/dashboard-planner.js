@@ -2,12 +2,14 @@
     const calendarGrid = document.getElementById("calendarGrid");
     const calendarTitle = document.getElementById("calendarTitle");
     const selectedDateText = document.getElementById("selectedDateText");
+    const selectedListDate = document.getElementById("selectedListDate");
     const selectedSummaryDate = document.getElementById("selectedSummaryDate");
     const todayCount = document.getElementById("todayCount");
     const monthCount = document.getElementById("monthCount");
     const dailyScheduleList = document.getElementById("dailyScheduleList");
     const scheduleInput = document.getElementById("scheduleInput");
     const saveScheduleButton = document.getElementById("saveScheduleButton");
+    const saveOrderButton = document.getElementById("saveOrderButton");
     const scheduleStatus = document.getElementById("scheduleStatus");
     const prevMonthButton = document.getElementById("prevMonthButton");
     const nextMonthButton = document.getElementById("nextMonthButton");
@@ -16,7 +18,31 @@
         return;
     }
 
-    const weekdayNames = ["일", "월", "화", "수", "목", "금", "토"];
+    const API = {
+        monthly: "/api/schedules",
+        daily: "/api/schedules/daily",
+        reorder: "/api/schedules/reorder",
+        deleteById: function (scheduleId) {
+            return "/api/schedules/" + scheduleId + "/delete";
+        }
+    };
+
+    const MESSAGES = {
+        today: "Today",
+        noSchedulesForDate: "No schedules on this date.",
+        orderChanged: "Order changed. Click Save Order to persist.",
+        enterSchedule: "Enter schedule content.",
+        noSchedulesToSave: "No schedules to save.",
+        saveFailed: "Failed to save schedule.",
+        orderSaveFailed: "Failed to save order.",
+        deleteFailed: "Failed to delete schedule.",
+        scheduleSaved: "Schedule saved.",
+        orderSaved: "Order saved.",
+        scheduleDeleted: "Schedule deleted.",
+        emptyApiResponse: "Schedule API response is empty. Check login status or server logs."
+    };
+
+    const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const today = new Date();
     const todayDate = formatDate(today);
 
@@ -24,80 +50,121 @@
     let currentMonth = today.getMonth() + 1;
     let selectedDate = todayDate;
     let monthlySchedules = [];
+    let dailySchedules = [];
 
-    // Date 객체를 yyyy-MM-dd 문자열로 변환한다.
     function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return year + "-" + month + "-" + day;
+        return formatDateParts(date.getFullYear(), date.getMonth() + 1, date.getDate());
     }
 
-    // yyyy-MM-dd 문자열을 Date 객체로 변환한다.
+    function formatDateParts(year, month, day) {
+        return year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+    }
+
     function parseDateString(value) {
         const parts = value.split("-").map(Number);
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
-    // 날짜 문자열을 화면 표시용 형식으로 바꾼다.
     function formatDisplayDate(value) {
         const date = parseDateString(value);
         const month = date.getMonth() + 1;
         const day = date.getDate();
         const weekday = weekdayNames[date.getDay()];
-        return month + "월 " + day + "일 (" + weekday + ")";
+        return month + "/" + day + " (" + weekday + ")";
     }
 
-    // JSON 요청용 공통 헤더를 만든다.
     function createHeaders() {
         return {
             "Content-Type": "application/json"
         };
     }
 
-    // 인증 만료를 처리하면서 JSON 응답을 가져온다.
-    async function fetchJson(url) {
-        const response = await fetch(url);
+    function redirectIfUnauthorized(response) {
         if (response.status === 401) {
             window.location.href = "/login";
+            return true;
+        }
+        return false;
+    }
+
+    function setStatus(message) {
+        if (scheduleStatus) {
+            scheduleStatus.textContent = message;
+        }
+    }
+
+    function selectedSummaryLabel() {
+        return selectedDate === todayDate ? MESSAGES.today : formatDisplayDate(selectedDate);
+    }
+
+    function updateSelectedSummaryDate() {
+        if (selectedSummaryDate) {
+            selectedSummaryDate.textContent = selectedSummaryLabel();
+        }
+    }
+
+    async function fetchJson(url) {
+        try {
+            const response = await fetch(url);
+            if (redirectIfUnauthorized(response)) {
+                return [];
+            }
+            if (!response.ok) {
+                return [];
+            }
+
+            const contentType = response.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) {
+                return [];
+            }
+            return await response.json();
+        } catch (error) {
             return [];
         }
-        return response.json();
     }
 
-    // 현재 월의 일정 목록을 서버에서 받아온다.
     async function fetchMonthlySchedules() {
-        monthlySchedules = await fetchJson("/api/schedules?year=" + currentYear + "&month=" + currentMonth);
+        monthlySchedules = await fetchJson(API.monthly + "?year=" + currentYear + "&month=" + currentMonth);
+        if (!Array.isArray(monthlySchedules)) {
+            monthlySchedules = [];
+        }
     }
 
-    // 선택한 날짜의 일정 목록을 서버에서 받아온다.
     async function fetchDailySchedules(date) {
-        return fetchJson("/api/schedules/daily?date=" + date);
+        const schedules = await fetchJson(API.daily + "?date=" + date);
+        return Array.isArray(schedules) ? schedules : [];
     }
 
-    // 상단 요약 카드의 숫자와 날짜를 갱신한다.
     function updateSummary(todaySchedules) {
         if (todayCount) {
-            todayCount.textContent = todaySchedules.length + "개";
+            todayCount.textContent = todaySchedules.length + "";
         }
-
         if (monthCount) {
-            monthCount.textContent = monthlySchedules.length + "개";
+            monthCount.textContent = monthlySchedules.length + "";
         }
-
-        if (selectedSummaryDate) {
-            selectedSummaryDate.textContent = selectedDate === todayDate ? "오늘" : formatDisplayDate(selectedDate);
-        }
+        updateSelectedSummaryDate();
     }
 
-    // 월간 일정 데이터를 기준으로 달력 UI를 다시 그린다.
+    function buildScheduleCountByDate() {
+        return monthlySchedules.reduce(function (map, item) {
+            if (!item || !item.date) {
+                return map;
+            }
+            map[item.date] = (map[item.date] || 0) + 1;
+            return map;
+        }, {});
+    }
+
     function renderCalendar() {
         const firstDay = new Date(currentYear, currentMonth - 1, 1);
         const lastDay = new Date(currentYear, currentMonth, 0);
-        const startWeekday = firstDay.getDay(); // 해당 월 1일 무슨요일인지 숫자로 나타낸 값 ex) 0: 일요일, 1: 월요일, 2: 화요일 ~~~~
-        const totalDays = lastDay.getDate(); //해당 월의 총 일수
+        const startWeekday = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+        const scheduleCountByDate = buildScheduleCountByDate();
 
-        calendarTitle.textContent = currentYear + "년 " + currentMonth + "월";
+        if (calendarTitle) {
+            calendarTitle.textContent = currentYear + "." + currentMonth;
+        }
         calendarGrid.innerHTML = "";
 
         for (let blank = 0; blank < startWeekday; blank += 1) {
@@ -107,81 +174,139 @@
         }
 
         for (let day = 1; day <= totalDays; day += 1) {
-            const cellDate = currentYear + "-" + String(currentMonth).padStart(2, "0") + "-" + String(day).padStart(2, "0");
-            const cell = document.createElement("button");
-            const scheduleCount = monthlySchedules.filter(function (item) {
-                return item.date === cellDate;
-            }).length;
-
-            const classes = ["calendar-cell"];
-            if (cellDate === selectedDate) {
-                classes.push("selected");
-            }
-            if (cellDate === todayDate) {
-                classes.push("today");
-            }
-
-            cell.type = "button";
-            cell.className = classes.join(" ");
-            cell.innerHTML = "<span class='date-number'>" + day + "</span>"
-                + (cellDate === todayDate ? "<span class='today-marker'>TODAY</span>" : "")
-                + (scheduleCount > 0 ? "<span class='date-badge'>" + scheduleCount + "</span>" : "");
-            cell.addEventListener("click", function () {
-                selectedDate = cellDate;
-                renderCalendar();
-                loadDailySchedules();
-            });
+            const cellDate = formatDateParts(currentYear, currentMonth, day);
+            const scheduleCount = scheduleCountByDate[cellDate] || 0;
+            const cell = createCalendarCell(cellDate, day, scheduleCount);
             calendarGrid.appendChild(cell);
         }
     }
 
-    // 현재 선택 날짜의 일정 목록을 불러와 화면에 표시한다.
-    async function loadDailySchedules() {
-        selectedDateText.textContent = formatDisplayDate(selectedDate);
-        if (selectedSummaryDate) {
-            selectedSummaryDate.textContent = selectedDate === todayDate ? "오늘" : formatDisplayDate(selectedDate);
+    function createCalendarCell(cellDate, day, scheduleCount) {
+        const cell = document.createElement("button");
+        const classes = ["calendar-cell"];
+
+        if (cellDate === selectedDate) {
+            classes.push("selected");
         }
-        const schedules = await fetchDailySchedules(selectedDate);
-        renderDailySchedules(schedules);
+        if (cellDate === todayDate) {
+            classes.push("today");
+        }
+
+        cell.type = "button";
+        cell.className = classes.join(" ");
+        cell.innerHTML = "<span class='date-number'>" + day + "</span>"
+            + (cellDate === todayDate ? "<span class='today-marker'>TODAY</span>" : "")
+            + (scheduleCount > 0 ? "<span class='date-badge'>" + scheduleCount + "</span>" : "");
+        cell.addEventListener("click", function () {
+            selectedDate = cellDate;
+            renderCalendar();
+            loadDailySchedules();
+        });
+
+        return cell;
     }
 
-    // 하루 일정 목록 영역을 다시 렌더링한다.
-    function renderDailySchedules(schedules) {
+    async function loadDailySchedules() {
+        const displayDate = formatDisplayDate(selectedDate);
+
+        if (selectedDateText) {
+            selectedDateText.textContent = displayDate;
+        }
+        if (selectedListDate) {
+            selectedListDate.textContent = displayDate;
+        }
+        updateSelectedSummaryDate();
+
+        dailySchedules = await fetchDailySchedules(selectedDate);
+        renderDailySchedules();
+    }
+
+    function renderDailySchedules() {
+        if (!dailyScheduleList) {
+            return;
+        }
         dailyScheduleList.innerHTML = "";
 
-        if (schedules.length === 0) {
-            dailyScheduleList.innerHTML = "<div class='empty-state'>선택한 날짜에 등록된 일정이 없습니다.</div>";
+        if (saveOrderButton) {
+            saveOrderButton.disabled = dailySchedules.length <= 1;
+        }
+
+        if (dailySchedules.length === 0) {
+            dailyScheduleList.innerHTML = "<div class='empty-state'>" + MESSAGES.noSchedulesForDate + "</div>";
             return;
         }
 
-        schedules.forEach(function (schedule) {
+        dailySchedules.forEach(function (schedule, index) {
             const item = document.createElement("div");
             item.className = "schedule-item";
-            item.innerHTML = "<div><strong>" + escapeHtml(schedule.content) + "</strong><p>" + formatDisplayDate(schedule.date) + "</p></div>";
 
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "mini-button";
-            button.textContent = "삭제";
-            button.addEventListener("click", function () {
+            const content = document.createElement("div");
+            content.className = "schedule-content";
+            content.innerHTML = "<strong>" + escapeHtml(schedule.content) + "</strong><p>" + formatDisplayDate(schedule.date) + "</p>";
+
+            const actions = document.createElement("div");
+            actions.className = "schedule-item-actions";
+
+            const upButton = document.createElement("button");
+            upButton.type = "button";
+            upButton.className = "mini-button";
+            upButton.textContent = "Up";
+            upButton.disabled = index === 0;
+            upButton.addEventListener("click", function () {
+                moveSchedule(index, -1);
+            });
+
+            const downButton = document.createElement("button");
+            downButton.type = "button";
+            downButton.className = "mini-button";
+            downButton.textContent = "Down";
+            downButton.disabled = index === dailySchedules.length - 1;
+            downButton.addEventListener("click", function () {
+                moveSchedule(index, 1);
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "mini-button";
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", function () {
                 deleteSchedule(schedule.id);
             });
 
-            item.appendChild(button);
+            actions.appendChild(upButton);
+            actions.appendChild(downButton);
+            actions.appendChild(deleteButton);
+            item.appendChild(content);
+            item.appendChild(actions);
             dailyScheduleList.appendChild(item);
         });
     }
 
-    // 입력창의 내용을 현재 선택 날짜 일정으로 저장한다.
-    async function saveSchedule() {
-        const content = scheduleInput.value.trim();
-
-        if (!content) {
-            scheduleStatus.textContent = "일정 내용을 입력하세요.";
+    function moveSchedule(index, offset) {
+        const target = index + offset;
+        if (target < 0 || target >= dailySchedules.length) {
             return;
         }
 
-        const response = await fetch("/api/schedules", {
+        const moved = dailySchedules[index];
+        dailySchedules.splice(index, 1);
+        dailySchedules.splice(target, 0, moved);
+        setStatus(MESSAGES.orderChanged);
+        renderDailySchedules();
+    }
+
+    async function saveSchedule() {
+        if (!scheduleInput) {
+            return;
+        }
+
+        const content = scheduleInput.value.trim();
+        if (!content) {
+            setStatus(MESSAGES.enterSchedule);
+            return;
+        }
+
+        const response = await fetch(API.monthly, {
             method: "POST",
             headers: createHeaders(),
             body: JSON.stringify({
@@ -190,57 +315,81 @@
             })
         });
 
-        if (response.status === 401) {
-            window.location.href = "/login";
+        if (redirectIfUnauthorized(response)) {
             return;
         }
-
         if (!response.ok) {
             const message = await response.text();
-            scheduleStatus.textContent = message || "일정을 저장하지 못했습니다.";
+            setStatus(message || MESSAGES.saveFailed);
             return;
         }
 
         scheduleInput.value = "";
-        scheduleStatus.textContent = "일정이 저장되었습니다.";
+        setStatus(MESSAGES.scheduleSaved);
         await refreshAll();
     }
 
-    // 선택한 일정 하나를 서버에 삭제 요청한다.
+    async function saveOrder() {
+        if (!dailySchedules.length) {
+            setStatus(MESSAGES.noSchedulesToSave);
+            return;
+        }
+
+        const response = await fetch(API.reorder, {
+            method: "POST",
+            headers: createHeaders(),
+            body: JSON.stringify({
+                date: selectedDate,
+                scheduleIds: dailySchedules.map(function (item) {
+                    return item.id;
+                })
+            })
+        });
+
+        if (redirectIfUnauthorized(response)) {
+            return;
+        }
+        if (!response.ok) {
+            const message = await response.text();
+            setStatus(message || MESSAGES.orderSaveFailed);
+            return;
+        }
+
+        setStatus(MESSAGES.orderSaved);
+        await refreshAll();
+    }
+
     async function deleteSchedule(scheduleId) {
-        const response = await fetch("/api/schedules/" + scheduleId + "/delete", {
+        const response = await fetch(API.deleteById(scheduleId), {
             method: "POST",
             headers: createHeaders()
         });
 
-        if (response.status === 401) {
-            window.location.href = "/login";
+        if (redirectIfUnauthorized(response)) {
             return;
         }
-
         if (!response.ok) {
-            scheduleStatus.textContent = "일정을 삭제하지 못했습니다.";
+            setStatus(MESSAGES.deleteFailed);
             return;
         }
 
-        scheduleStatus.textContent = "일정이 삭제되었습니다.";
+        setStatus(MESSAGES.scheduleDeleted);
         await refreshAll();
     }
 
-    // 월간 일정, 일간 일정, 요약 정보를 한 번에 새로고침한다.
     async function refreshAll() {
-        // 이번 달 일정 목록 서버에서 가져올때 까지 기다림
         await fetchMonthlySchedules();
-        // 달력을 렌더링
         renderCalendar();
-        // 현재 선태고딘 날짜의 일정 목록 가져옴
         await loadDailySchedules();
-        //
+
         const todaySchedules = await fetchDailySchedules(todayDate);
         updateSummary(todaySchedules);
+
+        if (monthlySchedules.length === 0 && dailySchedules.length === 0) {
+            setStatus(MESSAGES.emptyApiResponse);
+        }
     }
 
-    // 일정 내용을 안전하게 출력하기 위해 HTML 특수문자를 이스케이프한다.
     function escapeHtml(value) {
         return value
             .replaceAll("&", "&amp;")
@@ -250,27 +399,37 @@
             .replaceAll("'", "&#39;");
     }
 
-    prevMonthButton.addEventListener("click", async function () {
-        currentMonth -= 1;
+    async function moveMonth(offset) {
+        currentMonth += offset;
+
         if (currentMonth < 1) {
             currentMonth = 12;
             currentYear -= 1;
-        }
-        selectedDate = currentYear + "-" + String(currentMonth).padStart(2, "0") + "-01";
-        await refreshAll();
-    });
-
-    nextMonthButton.addEventListener("click", async function () {
-        currentMonth += 1;
-        if (currentMonth > 12) {
+        } else if (currentMonth > 12) {
             currentMonth = 1;
             currentYear += 1;
         }
-        selectedDate = currentYear + "-" + String(currentMonth).padStart(2, "0") + "-01";
-        await refreshAll();
-    });
 
-    saveScheduleButton.addEventListener("click", saveSchedule);
+        selectedDate = formatDateParts(currentYear, currentMonth, 1);
+        await refreshAll();
+    }
+
+    if (prevMonthButton) {
+        prevMonthButton.addEventListener("click", function () {
+            moveMonth(-1);
+        });
+    }
+    if (nextMonthButton) {
+        nextMonthButton.addEventListener("click", function () {
+            moveMonth(1);
+        });
+    }
+    if (saveScheduleButton) {
+        saveScheduleButton.addEventListener("click", saveSchedule);
+    }
+    if (saveOrderButton) {
+        saveOrderButton.addEventListener("click", saveOrder);
+    }
 
     refreshAll();
 })();

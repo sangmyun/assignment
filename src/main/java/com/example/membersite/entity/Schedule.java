@@ -15,6 +15,7 @@ public class Schedule {
     private Long memberId;
     private LocalDate planDate;
     private String content;
+    private int displayOrder;
     private LocalDateTime createdAt;
 
     // 프레임워크가 필요로 하는 기본 생성자다.
@@ -22,20 +23,39 @@ public class Schedule {
     }
 
     // 새 일정 생성 시에는 생성 시각을 현재 시각으로 자동 기록한다.
-    public Schedule(Long memberId, LocalDate planDate, String content) {
+    public Schedule(Long memberId, LocalDate planDate, String content, int displayOrder) {
         this.memberId = memberId;
         this.planDate = planDate;
         this.content = content;
+        this.displayOrder = displayOrder;
         this.createdAt = LocalDateTime.now();
     }
 
     // DB에서 읽어온 일정은 id와 생성 시각까지 포함해 복원한다.
-    public Schedule(Long id, Long memberId, LocalDate planDate, String content, LocalDateTime createdAt) {
+    public Schedule(
+            Long id,
+            Long memberId,
+            LocalDate planDate,
+            String content,
+            int displayOrder,
+            LocalDateTime createdAt) {
         this.id = id;
         this.memberId = memberId;
         this.planDate = planDate;
         this.content = content;
+        this.displayOrder = displayOrder;
         this.createdAt = createdAt;
+    }
+
+    // MyBatis constructor mapping compatibility for wrapper Integer type.
+    public Schedule(
+            Long id,
+            Long memberId,
+            LocalDate planDate,
+            String content,
+            Integer displayOrder,
+            LocalDateTime createdAt) {
+        this(id, memberId, planDate, content, displayOrder == null ? 0 : displayOrder, createdAt);
     }
 
     // 반환: 일정 고유 ID
@@ -56,6 +76,11 @@ public class Schedule {
     // 반환: 일정 내용
     public String getContent() {
         return content;
+    }
+
+    // 반환: 같은 날짜 안에서 화면에 보여줄 정렬 순서
+    public int getDisplayOrder() {
+        return displayOrder;
     }
 
     // 반환: 일정 생성 시각

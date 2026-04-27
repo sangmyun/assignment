@@ -1,6 +1,7 @@
 package com.example.membersite.controller;
 
 import com.example.membersite.dto.ScheduleCreateRequest;
+import com.example.membersite.dto.ScheduleReorderRequest;
 import com.example.membersite.dto.ScheduleResponse;
 import com.example.membersite.interceptor.LoginCheckInterceptor;
 import com.example.membersite.service.ScheduleService;
@@ -68,6 +69,26 @@ public class ScheduleApiController {
 
         try {
             return ResponseEntity.ok(scheduleService.create(loginId, scheduleCreateRequest));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+    }
+
+    /**
+     * Reorders schedules of a selected date.
+     *
+     * @param request servlet request
+     * @param reorderRequest reorder payload
+     * @return 200 on success or 400 with validation message
+     */
+    @PostMapping("/reorder")
+    public ResponseEntity<?> reorder(HttpServletRequest request,
+                                     @RequestBody ScheduleReorderRequest reorderRequest) {
+        String loginId = getLoginId(request);
+
+        try {
+            scheduleService.reorder(loginId, reorderRequest);
+            return ResponseEntity.ok().build();
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
         }

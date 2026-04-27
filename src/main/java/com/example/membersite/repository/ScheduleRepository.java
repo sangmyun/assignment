@@ -20,11 +20,15 @@ public class ScheduleRepository {
      * @param endDate end date
      * @return ordered schedules
      */
-    public List<Schedule> findByMemberIdAndPlanDateBetweenOrderByPlanDateAscIdAsc(
+    public List<Schedule> findByMemberIdAndPlanDateBetweenOrderByPlanDateAscDisplayOrderAscIdAsc(
             Long memberId,
             LocalDate startDate,
             LocalDate endDate) {
-        return scheduleMapper.findByMemberIdAndPlanDateBetweenOrderByPlanDateAscIdAsc(memberId, startDate, endDate);
+        return scheduleMapper.findByMemberIdAndPlanDateBetweenOrderByPlanDateAscDisplayOrderAscIdAsc(
+                memberId,
+                startDate,
+                endDate
+        );
     }
 
     /**
@@ -34,8 +38,8 @@ public class ScheduleRepository {
      * @param planDate plan date
      * @return ordered schedules
      */
-    public List<Schedule> findByMemberIdAndPlanDateOrderByIdAsc(Long memberId, LocalDate planDate) {
-        return scheduleMapper.findByMemberIdAndPlanDateOrderByIdAsc(memberId, planDate);
+    public List<Schedule> findByMemberIdAndPlanDateOrderByDisplayOrderAscIdAsc(Long memberId, LocalDate planDate) {
+        return scheduleMapper.findByMemberIdAndPlanDateOrderByDisplayOrderAscIdAsc(memberId, planDate);
     }
 
     /**
@@ -49,6 +53,7 @@ public class ScheduleRepository {
                 schedule.getMemberId(),
                 schedule.getPlanDate(),
                 schedule.getContent(),
+                schedule.getDisplayOrder(),
                 schedule.getCreatedAt()
         );
         int affectedRows = scheduleMapper.insert(param);
@@ -61,8 +66,33 @@ public class ScheduleRepository {
                 schedule.getMemberId(),
                 schedule.getPlanDate(),
                 schedule.getContent(),
+                schedule.getDisplayOrder(),
                 schedule.getCreatedAt()
         );
+    }
+
+    /**
+     * Finds max display order for a member/date.
+     *
+     * @param memberId member id
+     * @param planDate plan date
+     * @return max display order, zero when empty
+     */
+    public int findMaxDisplayOrderByMemberIdAndPlanDate(Long memberId, LocalDate planDate) {
+        Integer maxOrder = scheduleMapper.findMaxDisplayOrderByMemberIdAndPlanDate(memberId, planDate);
+        return maxOrder == null ? 0 : maxOrder;
+    }
+
+    /**
+     * Updates display order by schedule id and owner member id.
+     *
+     * @param scheduleId schedule id
+     * @param memberId member id
+     * @param displayOrder new order
+     * @return affected row count
+     */
+    public int updateDisplayOrderByIdAndMemberId(Long scheduleId, Long memberId, int displayOrder) {
+        return scheduleMapper.updateDisplayOrderByIdAndMemberId(scheduleId, memberId, displayOrder);
     }
 
     /**

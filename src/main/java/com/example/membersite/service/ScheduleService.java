@@ -1,15 +1,19 @@
 package com.example.membersite.service;
 
 import com.example.membersite.dto.ScheduleCreateRequest;
+import com.example.membersite.dto.ScheduleReorderRequest;
 import com.example.membersite.dto.ScheduleResponse;
 import com.example.membersite.entity.Member;
 import com.example.membersite.entity.Schedule;
 import com.example.membersite.repository.ScheduleRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +36,11 @@ public class ScheduleService {
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
         List<Schedule> schedules = scheduleRepository
-                .findByMemberIdAndPlanDateBetweenOrderByPlanDateAscIdAsc(member.getId(), startDate, endDate);
+                .findByMemberIdAndPlanDateBetweenOrderByPlanDateAscDisplayOrderAscIdAsc(
+                        member.getId(),
+                        startDate,
+                        endDate
+                );
         List<ScheduleResponse> responses = new ArrayList<>();
         for (Schedule schedule : schedules) {
             responses.add(ScheduleResponse.from(schedule));
@@ -49,7 +57,8 @@ public class ScheduleService {
      */
     public List<ScheduleResponse> findDailySchedules(String loginId, LocalDate date) {
         Member member = memberService.findByLoginId(loginId);
-        List<Schedule> schedules = scheduleRepository.findByMemberIdAndPlanDateOrderByIdAsc(member.getId(), date);
+        List<Schedule> schedules = scheduleRepository
+                .findByMemberIdAndPlanDateOrderByDisplayOrderAscIdAsc(member.getId(), date);
         List<ScheduleResponse> responses = new ArrayList<>();
         for (Schedule schedule : schedules) {
             responses.add(ScheduleResponse.from(schedule));
@@ -68,8 +77,54 @@ public class ScheduleService {
         validate(request);
 
         Member member = memberService.findByLoginId(loginId);
-        Schedule schedule = new Schedule(member.getId(), request.getDate(), request.getContent().trim());
+        int nextDisplayOrder = scheduleRepository.findMaxDisplayOrderByMemberIdAndPlanDate(
+                member.getId(),
+                request.getDate()
+        ) + 1;
+        Schedule schedule = new Schedule(member.getId(), request.getDate(), request.getContent().trim(), nextDisplayOrder);
         return ScheduleResponse.from(scheduleRepository.save(schedule));
+    }
+
+    /**
+     * Reorders all schedules of a date for the authenticated user in one transaction.
+     *
+     * @param loginId login id
+     * @param request reorder request
+     */
+    @Transactional
+    public void reorder(String loginId, ScheduleReorderRequest request) {
+        validateReorderRequest(request);
+
+        Member member = memberService.findByLoginId(loginId);
+        List<Schedule> schedules = scheduleRepository
+                .findByMemberIdAndPlanDateOrderByDisplayOrderAscIdAsc(member.getId(), request.getDate());
+
+        if (schedules.size() != request.getScheduleIds().size()) {
+            throw new IllegalArgumentException("Reorder payload must contain all schedules of the selected date.");
+        }
+
+        Set<Long> existingIds = new HashSet<>();
+        for (Schedule schedule : schedules) {
+            existingIds.add(schedule.getId());
+        }
+
+        for (Long scheduleId : request.getScheduleIds()) {
+            if (!existingIds.contains(scheduleId)) {
+                throw new IllegalArgumentException("Reorder payload contains invalid schedule id.");
+            }
+        }
+
+        for (int index = 0; index < request.getScheduleIds().size(); index++) {
+            Long scheduleId = request.getScheduleIds().get(index);
+            int affectedRows = scheduleRepository.updateDisplayOrderByIdAndMemberId(
+                    scheduleId,
+                    member.getId(),
+                    index + 1
+            );
+            if (affectedRows != 1) {
+                throw new IllegalStateException("Failed to reorder schedules.");
+            }
+        }
     }
 
     /**
@@ -104,6 +159,35 @@ public class ScheduleService {
 
         if (request.getContent().trim().length() > 100) {
             throw new IllegalArgumentException("Content must be 100 characters or less.");
+        }
+    }
+
+    /**
+     * Validates schedule reorder input.
+     *
+     * @param request reorder request
+     */
+    private void validateReorderRequest(ScheduleReorderRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Reorder request is required.");
+        }
+
+        if (request.getDate() == null) {
+            throw new IllegalArgumentException("Date is required.");
+        }
+
+        if (request.getScheduleIds() == null || request.getScheduleIds().isEmpty()) {
+            throw new IllegalArgumentException("Schedule id list is required.");
+        }
+
+        Set<Long> uniqueIds = new HashSet<>();
+        for (Long scheduleId : request.getScheduleIds()) {
+            if (scheduleId == null) {
+                throw new IllegalArgumentException("Schedule id must not be null.");
+            }
+            if (!uniqueIds.add(scheduleId)) {
+                throw new IllegalArgumentException("Schedule id list must not contain duplicates.");
+            }
         }
     }
 }
